@@ -4,20 +4,20 @@ import Point from '../geo/Point';
 import Map from './Map';
 import { isNil, isFunction, hasOwn } from '../core/util';
 
-function equalView(view1, view2) {
-    for (const p in view1) {
-        if (hasOwn(view1, p)) {
-            if (p === 'center') {
-                if (view1[p][0] !== view2[p][0] || view1[p][1] !== view2[p][1]) {
-                    return false;
-                }
-            } else if (view1[p] !== view2[p]) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
+// function equalView(view1, view2) {
+//     for (const p in view1) {
+//         if (hasOwn(view1, p)) {
+//             if (p === 'center') {
+//                 if (view1[p][0] !== view2[p][0] || view1[p][1] !== view2[p][1]) {
+//                     return false;
+//                 }
+//             } else if (view1[p] !== view2[p]) {
+//                 return false;
+//             }
+//         }
+//     }
+//     return true;
+// }
 
 Map.include(/** @lends Map.prototype */{
 
