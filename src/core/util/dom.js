@@ -6,16 +6,16 @@
  * @name DomUtil
  */
 
-import Browser from  '../Browser';
-import { IS_NODE } from './env';
-import { isString, isNil } from './common';
-import { splitWords } from './strings';
-import Point from '../../geo/Point';
-import Size from '../../geo/Size';
+import Browser from '../Browser'
+import { IS_NODE } from './env'
+import { isString, isNil } from './common'
+import { splitWords } from './strings'
+import Point from '../../geo/Point'
+import Size from '../../geo/Size'
 
 const first = (props) => {
-    return props[0];
-};
+  return props[0]
+}
 
 /**
  * From Leaflet.DomUtil
@@ -28,16 +28,15 @@ const first = (props) => {
  * @private
  */
 const testProp = IS_NODE ? first : (props) => {
+  const style = document.documentElement.style
 
-    const style = document.documentElement.style;
-
-    for (let i = 0; i < props.length; i++) {
-        if (props[i] in style) {
-            return props[i];
-        }
+  for (let i = 0; i < props.length; i++) {
+    if (props[i] in style) {
+      return props[i]
     }
-    return false;
-};
+  }
+  return false
+}
 
 // prefix style property names
 
@@ -48,7 +47,7 @@ const testProp = IS_NODE ? first : (props) => {
  * @type {String}
  */
 export const TRANSFORM = testProp(
-    ['transform', 'WebkitTransform', 'OTransform', 'MozTransform', 'msTransform']);
+  ['transform', 'WebkitTransform', 'OTransform', 'MozTransform', 'msTransform'])
 
 /**
  * Vendor-prefixed tfransform-origin name (e.g. `'webkitTransformOrigin'` for WebKit).
@@ -57,7 +56,7 @@ export const TRANSFORM = testProp(
  * @type {String}
  */
 export const TRANSFORMORIGIN = testProp(
-    ['transformOrigin', 'WebkitTransformOrigin', 'OTransformOrigin', 'MozTransformOrigin', 'msTransformOrigin']);
+  ['transformOrigin', 'WebkitTransformOrigin', 'OTransformOrigin', 'MozTransformOrigin', 'msTransformOrigin'])
 
 /**
  * Vendor-prefixed transition name (e.g. `'WebkitTransition'` for WebKit).
@@ -66,7 +65,7 @@ export const TRANSFORMORIGIN = testProp(
  * @type {String}
  */
 export const TRANSITION = testProp(
-    ['transition', 'WebkitTransition', 'OTransition', 'MozTransition', 'msTransition']);
+  ['transition', 'WebkitTransition', 'OTransition', 'MozTransition', 'msTransition'])
 
 /**
  * Vendor-prefixed filter name (e.g. `'WebkitFilter'` for WebKit).
@@ -75,7 +74,7 @@ export const TRANSITION = testProp(
  * @type {String}
  */
 export const CSSFILTER = testProp(
-    ['filter', 'WebkitFilter', 'OFilter', 'MozFilter', 'msFilter']);
+  ['filter', 'WebkitFilter', 'OFilter', 'MozFilter', 'msFilter'])
 
 /**
  * Create a html element.
@@ -83,12 +82,12 @@ export const CSSFILTER = testProp(
  * @returns {HTMLElement}
  * @memberOf DomUtil
  */
-export function createEl(tagName, className) {
-    const el = document.createElement(tagName);
-    if (className) {
-        setClass(el, className);
-    }
-    return el;
+export function createEl (tagName, className) {
+  const el = document.createElement(tagName)
+  if (className) {
+    setClass(el, className)
+  }
+  return el
 }
 
 /**
@@ -99,15 +98,15 @@ export function createEl(tagName, className) {
  * @return {HTMLElement}
  * @memberOf DomUtil
  */
-export function createElOn(tagName, style, container) {
-    const el = createEl(tagName);
-    if (style) {
-        setStyle(el, style);
-    }
-    if (container) {
-        container.appendChild(el);
-    }
-    return el;
+export function createElOn (tagName, style, container) {
+  const el = createEl(tagName)
+  if (style) {
+    setStyle(el, style)
+  }
+  if (container) {
+    container.appendChild(el)
+  }
+  return el
 }
 
 /**
@@ -116,21 +115,21 @@ export function createElOn(tagName, style, container) {
  * @memberOf DomUtil
  */
 /* istanbul ignore next */
-export function removeDomNode(node) {
-    if (!node) {
-        return this;
-    }
-    if (Browser.ielt9 || Browser.ie9) {
-        //fix memory leak in IE9-
-        //http://com.hemiola.com/2009/11/23/memory-leaks-in-ie8/
-        let d = createEl('div');
-        d.appendChild(node);
-        d.innerHTML = '';
-        d = null;
-    } else if (node.parentNode) {
-        node.parentNode.removeChild(node);
-    }
-    return this;
+export function removeDomNode (node) {
+  if (!node) {
+    return this
+  }
+  if (Browser.ielt9 || Browser.ie9) {
+    // fix memory leak in IE9-
+    // http://com.hemiola.com/2009/11/23/memory-leaks-in-ie8/
+    let d = createEl('div')
+    d.appendChild(node)
+    d.innerHTML = ''
+    d = null
+  } else if (node.parentNode) {
+    node.parentNode.removeChild(node)
+  }
+  return this
 }
 
 /**
@@ -141,43 +140,41 @@ export function removeDomNode(node) {
  * @param {Object} context      - function context
  * @memberOf DomUtil
  */
-export function addDomEvent(obj, typeArr, handler, context) {
-    if (!obj || !obj.addEventListener || !typeArr || !handler) {
-        return this;
+export function addDomEvent (obj, typeArr, handler, context) {
+  if (!obj || !obj.addEventListener || !typeArr || !handler) {
+    return this
+  }
+  const eventHandler = function (e) {
+    if (!e) {
+      e = window.event
     }
-    const eventHandler = function (e) {
-        if (!e) {
-            e = window.event;
-        }
-        handler.call(context || obj, e);
-        return;
-    };
-    const types = typeArr.split(' ');
-    for (let i = types.length - 1; i >= 0; i--) {
-        let type = types[i];
-        if (!type) {
-            continue;
-        }
-
-        if (!obj['Z__' + type]) {
-            obj['Z__' + type] = [];
-
-        }
-        const hit = listensDomEvent(obj, type, handler);
-        if (hit >= 0) {
-            removeDomEvent(obj, type, handler);
-        }
-        obj['Z__' + type].push({
-            callback: eventHandler,
-            src: handler
-        });
-        //firefox
-        if (type === 'mousewheel' && Browser.gecko) {
-            type = 'DOMMouseScroll';
-        }
-        obj.addEventListener(type, eventHandler, false);
+    handler.call(context || obj, e)
+  }
+  const types = typeArr.split(' ')
+  for (let i = types.length - 1; i >= 0; i--) {
+    let type = types[i]
+    if (!type) {
+      continue
     }
-    return this;
+
+    if (!obj['Z__' + type]) {
+      obj['Z__' + type] = []
+    }
+    const hit = listensDomEvent(obj, type, handler)
+    if (hit >= 0) {
+      removeDomEvent(obj, type, handler)
+    }
+    obj['Z__' + type].push({
+      callback: eventHandler,
+      src: handler
+    })
+    // firefox
+    if (type === 'mousewheel' && Browser.gecko) {
+      type = 'DOMMouseScroll'
+    }
+    obj.addEventListener(type, eventHandler, false)
+  }
+  return this
 }
 
 /**
@@ -187,41 +184,41 @@ export function addDomEvent(obj, typeArr, handler, context) {
  * @param {Function} handler        - listening function
  * @memberOf DomUtil
  */
-export function removeDomEvent(obj, typeArr, handler) {
-    function doRemove(type, callback) {
-        //mouse wheel in firefox
-        if (type === 'mousewheel' && Browser.gecko) {
-            type = 'DOMMouseScroll';
-        }
-        obj.removeEventListener(type, callback, false);
+export function removeDomEvent (obj, typeArr, handler) {
+  function doRemove (type, callback) {
+    // mouse wheel in firefox
+    if (type === 'mousewheel' && Browser.gecko) {
+      type = 'DOMMouseScroll'
     }
-    if (!obj || !obj.removeEventListener || !typeArr) {
-        return this;
+    obj.removeEventListener(type, callback, false)
+  }
+  if (!obj || !obj.removeEventListener || !typeArr) {
+    return this
+  }
+  const types = typeArr.split(' ')
+  for (let i = types.length - 1; i >= 0; i--) {
+    const type = types[i]
+    if (!type) {
+      continue
     }
-    const types = typeArr.split(' ');
-    for (let i = types.length - 1; i >= 0; i--) {
-        const type = types[i];
-        if (!type) {
-            continue;
-        }
-        //remove all the listeners if handler is not given.
-        if (!handler && obj['Z__' + type]) {
-            const handlers = obj['Z__' + type];
-            for (let j = 0, jlen = handlers.length; j < jlen; j++) {
-                doRemove(handlers[j].callback);
-            }
-            delete obj['Z__' + type];
-            return this;
-        }
-        const hit = listensDomEvent(obj, type, handler);
-        if (hit < 0) {
-            return this;
-        }
-        const hitHandler = obj['Z__' + type][hit];
-        doRemove(type, hitHandler.callback);
-        obj['Z__' + type].splice(hit, 1);
+    // remove all the listeners if handler is not given.
+    if (!handler && obj['Z__' + type]) {
+      const handlers = obj['Z__' + type]
+      for (let j = 0, jlen = handlers.length; j < jlen; j++) {
+        doRemove(handlers[j].callback)
+      }
+      delete obj['Z__' + type]
+      return this
     }
-    return this;
+    const hit = listensDomEvent(obj, type, handler)
+    if (hit < 0) {
+      return this
+    }
+    const hitHandler = obj['Z__' + type][hit]
+    doRemove(type, hitHandler.callback)
+    obj['Z__' + type].splice(hit, 1)
+  }
+  return this
 }
 
 /**
@@ -232,17 +229,17 @@ export function removeDomEvent(obj, typeArr, handler) {
  * @return {Number} - the handler's index in the listener chain, returns -1 if not.
  * @memberOf DomUtil
  */
-export function listensDomEvent(obj, type, handler) {
-    if (!obj || !obj['Z__' + type] || !handler) {
-        return -1;
+export function listensDomEvent (obj, type, handler) {
+  if (!obj || !obj['Z__' + type] || !handler) {
+    return -1
+  }
+  const handlers = obj['Z__' + type]
+  for (let i = 0, len = handlers.length; i < len; i++) {
+    if (handlers[i].src === handler) {
+      return i
     }
-    const handlers = obj['Z__' + type];
-    for (let i = 0, len = handlers.length; i < len; i++) {
-        if (handlers[i].src === handler) {
-            return i;
-        }
-    }
-    return -1;
+  }
+  return -1
 }
 
 /**
@@ -251,13 +248,13 @@ export function listensDomEvent(obj, type, handler) {
  * @param {Event} event - browser event
  * @memberOf DomUtil
  */
-export function preventDefault(event) {
-    if (event.preventDefault) {
-        event.preventDefault();
-    } else {
-        event.returnValue = false;
-    }
-    return this;
+export function preventDefault (event) {
+  if (event.preventDefault) {
+    event.preventDefault()
+  } else {
+    event.returnValue = false
+  }
+  return this
 }
 
 /**
@@ -265,24 +262,24 @@ export function preventDefault(event) {
  * @param  {Event} e - browser event.
  * @memberOf DomUtil
  */
-export function stopPropagation(e) {
-    if (e.stopPropagation) {
-        e.stopPropagation();
-    } else {
-        e.cancelBubble = true;
-    }
-    return this;
+export function stopPropagation (e) {
+  if (e.stopPropagation) {
+    e.stopPropagation()
+  } else {
+    e.cancelBubble = true
+  }
+  return this
 }
 
-export function preventSelection(dom) {
-    dom.onselectstart = function () {
-        return false;
-    };
-    dom.ondragstart = function () {
-        return false;
-    };
-    dom.setAttribute('unselectable', 'on');
-    return this;
+export function preventSelection (dom) {
+  dom.onselectstart = function () {
+    return false
+  }
+  dom.ondragstart = function () {
+    return false
+  }
+  dom.setAttribute('unselectable', 'on')
+  return this
 }
 
 /**
@@ -292,18 +289,18 @@ export function preventSelection(dom) {
  * @return {Point} - dom element's current position if offset is null.
  * @memberOf DomUtil
  */
-export function offsetDom(dom, offset) {
-    if (!dom) {
-        return null;
-    }
+export function offsetDom (dom, offset) {
+  if (!dom) {
+    return null
+  }
 
-    if (Browser.any3d) {
-        setTransform(dom, offset);
-    } else {
-        dom.style.left = offset.x + 'px';
-        dom.style.top = offset.y + 'px';
-    }
-    return offset;
+  if (Browser.any3d) {
+    setTransform(dom, offset)
+  } else {
+    dom.style.left = offset.x + 'px'
+    dom.style.top = offset.y + 'px'
+  }
+  return offset
 }
 
 /**
@@ -312,20 +309,20 @@ export function offsetDom(dom, offset) {
  * @return {Number[]}
  * @memberOf DomUtil
  */
-export function computeDomPosition(dom) {
-    const style = window.getComputedStyle(dom);
-    const padding = [
-        parseInt(style['padding-left']),
-        parseInt(style['padding-top'])
-    ];
-    const rect = dom.getBoundingClientRect();
-    //fix #450, inspired by https://github.com/Leaflet/Leaflet/pull/5794/files
-    const offsetWidth = dom.offsetWidth,
-        offsetHeight = dom.offsetHeight;
-    const scaleX = offsetWidth ? rect.width / offsetWidth : 1,
-        scaleY = offsetHeight ? rect.height / offsetHeight : 1;
-    dom.__position = [rect.left + padding[0], rect.top + padding[1], scaleX, scaleY];
-    return dom.__position;
+export function computeDomPosition (dom) {
+  const style = window.getComputedStyle(dom)
+  const padding = [
+    parseInt(style['padding-left']),
+    parseInt(style['padding-top'])
+  ]
+  const rect = dom.getBoundingClientRect()
+  // fix #450, inspired by https://github.com/Leaflet/Leaflet/pull/5794/files
+  const offsetWidth = dom.offsetWidth
+  const offsetHeight = dom.offsetHeight
+  const scaleX = offsetWidth ? rect.width / offsetWidth : 1
+  const scaleY = offsetHeight ? rect.height / offsetHeight : 1
+  dom.__position = [rect.left + padding[0], rect.top + padding[1], scaleX, scaleY]
+  return dom.__position
 }
 
 /**
@@ -334,24 +331,24 @@ export function computeDomPosition(dom) {
  * @return {Point}
  * @memberOf DomUtil
  */
-export function getEventContainerPoint(ev, dom) {
-    if (!ev) {
-        ev = window.event;
-    }
-    let domPos = dom.__position;
-    if (!domPos) {
-        domPos = computeDomPosition(dom);
-    }
-    // div by scaleX, scaleY to fix #450
-    return new Point(
-        (ev.clientX - domPos[0] - dom.clientLeft) / domPos[2],
-        (ev.clientY - domPos[1] - dom.clientTop) / domPos[3]
-    );
+export function getEventContainerPoint (ev, dom) {
+  if (!ev) {
+    ev = window.event
+  }
+  let domPos = dom.__position
+  if (!domPos) {
+    domPos = computeDomPosition(dom)
+  }
+  // div by scaleX, scaleY to fix #450
+  return new Point(
+    (ev.clientX - domPos[0] - dom.clientLeft) / domPos[2],
+    (ev.clientY - domPos[1] - dom.clientTop) / domPos[3]
+  )
 }
 
-function endsWith(str, suffix) {
-    const l = str.length - suffix.length;
-    return l >= 0 && str.indexOf(suffix, l) === l;
+function endsWith (str, suffix) {
+  const l = str.length - suffix.length
+  return l >= 0 && str.indexOf(suffix, l) === l
 }
 
 /**
@@ -360,13 +357,13 @@ function endsWith(str, suffix) {
  * @param {String} strCss css text
  * @memberOf DomUtil
  */
-export function setStyle(dom, strCss) {
-    let cssText = dom.style.cssText;
-    if (!endsWith(cssText, ';')) {
-        cssText += ';';
-    }
-    dom.style.cssText = cssText + strCss;
-    return this;
+export function setStyle (dom, strCss) {
+  let cssText = dom.style.cssText
+  if (!endsWith(cssText, ';')) {
+    cssText += ';'
+  }
+  dom.style.cssText = cssText + strCss
+  return this
 }
 
 /**
@@ -375,12 +372,12 @@ export function setStyle(dom, strCss) {
  * @param {String} name css class
  * @memberOf DomUtil
  */
-export function hasClass(el, name) {
-    if (el.classList !== undefined) {
-        return el.classList.contains(name);
-    }
-    const className = getClass(el);
-    return className.length > 0 && new RegExp('(^|\\s)' + name + '(\\s|$)').test(className);
+export function hasClass (el, name) {
+  if (el.classList !== undefined) {
+    return el.classList.contains(name)
+  }
+  const className = getClass(el)
+  return className.length > 0 && new RegExp('(^|\\s)' + name + '(\\s|$)').test(className)
 }
 
 /**
@@ -389,17 +386,17 @@ export function hasClass(el, name) {
  * @param {String} name css class
  * @memberOf DomUtil
  */
-export function addClass(el, name) {
-    if (el.classList !== undefined && !hasClass(el, name)) {
-        const classes = splitWords(name);
-        for (let i = 0, len = classes.length; i < len; i++) {
-            el.classList.add(classes[i]);
-        }
-    } else {
-        const className = getClass(el);
-        setClass(el, (className ? className + ' ' : '') + name);
+export function addClass (el, name) {
+  if (el.classList !== undefined && !hasClass(el, name)) {
+    const classes = splitWords(name)
+    for (let i = 0, len = classes.length; i < len; i++) {
+      el.classList.add(classes[i])
     }
-    return this;
+  } else {
+    const className = getClass(el)
+    setClass(el, (className ? className + ' ' : '') + name)
+  }
+  return this
 }
 
 /**
@@ -408,13 +405,13 @@ export function addClass(el, name) {
  * @param {String} name css class
  * @memberOf DomUtil
  */
-export function setClass(el, name) {
-    if (isNil(el.className.baseVal)) {
-        el.className = name;
-    } else {
-        el.className.baseVal = name;
-    }
-    return this;
+export function setClass (el, name) {
+  if (isNil(el.className.baseVal)) {
+    el.className = name
+  } else {
+    el.className.baseVal = name
+  }
+  return this
 }
 
 /**
@@ -423,14 +420,13 @@ export function setClass(el, name) {
  * @retrun {String} class字符串
  * @memberOf DomUtil
  */
-export function getClass(el) {
-    return isNil(el.className.baseVal) ? el.className : el.className.baseVal;
+export function getClass (el) {
+  return isNil(el.className.baseVal) ? el.className : el.className.baseVal
 }
 
-
-export function setOpacity(el, value) {
-    el.style.opacity = value;
-    return this;
+export function setOpacity (el, value) {
+  el.style.opacity = value
+  return this
 }
 
 // export function copyCanvas(src) {
@@ -450,52 +446,52 @@ export function setOpacity(el, value) {
  * @param {Point} offset
  * @memberOf DomUtil
  */
-export function setTransform(el, offset) {
-    const pos = offset || new Point(0, 0);
-    el.style[TRANSFORM] =
-        Browser.any3d ?
-            'translate3d(' + pos.x + 'px,' + pos.y + 'px,0px)' :
-            'translate(' + pos.x + 'px,' + pos.y + 'px)';
+export function setTransform (el, offset) {
+  const pos = offset || new Point(0, 0)
+  el.style[TRANSFORM] =
+        Browser.any3d
+          ? 'translate3d(' + pos.x + 'px,' + pos.y + 'px,0px)'
+          : 'translate(' + pos.x + 'px,' + pos.y + 'px)'
 
-    return this;
+  return this
 }
 
-export function setTransformMatrix(el, m) {
-    const text = 'matrix(' + (isString(m) ? m : m.join()) + ')';
-    if (el.style[TRANSFORM] !== text) {
-        el.style[TRANSFORM] = text;
-    }
-    return this;
+export function setTransformMatrix (el, m) {
+  const text = 'matrix(' + (isString(m) ? m : m.join()) + ')'
+  if (el.style[TRANSFORM] !== text) {
+    el.style[TRANSFORM] = text
+  }
+  return this
 }
 
-export function removeTransform(el) {
-    if (el.style[TRANSFORM]) {
-        el.style[TRANSFORM] = '';
-    }
-    return this;
+export function removeTransform (el) {
+  if (el.style[TRANSFORM]) {
+    el.style[TRANSFORM] = ''
+  }
+  return this
 }
 
-export function isHTML(str) {
-    return /<[a-z\][\s\S]*>/i.test(str);
+export function isHTML (str) {
+  return /<[a-z\][\s\S]*>/i.test(str)
 }
 
-export function measureDom(parentTag, dom) {
-    const ruler = getDomRuler(parentTag);
-    if (isString(dom)) {
-        ruler.innerHTML = dom;
-    } else {
-        ruler.appendChild(dom);
-    }
-    const result = new Size(ruler.clientWidth, ruler.clientHeight);
-    removeDomNode(ruler);
-    return result;
+export function measureDom (parentTag, dom) {
+  const ruler = getDomRuler(parentTag)
+  if (isString(dom)) {
+    ruler.innerHTML = dom
+  } else {
+    ruler.appendChild(dom)
+  }
+  const result = new Size(ruler.clientWidth, ruler.clientHeight)
+  removeDomNode(ruler)
+  return result
 }
 
-export function getDomRuler(tag) {
-    const span = document.createElement(tag);
-    span.style.cssText = 'position:absolute;left:-10000px;top:-10000px;';
-    document.body.appendChild(span);
-    return span;
+export function getDomRuler (tag) {
+  const span = document.createElement(tag)
+  span.style.cssText = 'position:absolute;left:-10000px;top:-10000px;'
+  document.body.appendChild(span)
+  return span
 }
 
 /**
@@ -509,7 +505,7 @@ export function getDomRuler(tag) {
  * @return {DomUtil}
  * @memberOf DomUtil
  */
-export const on = addDomEvent;
+export const on = addDomEvent
 
 /**
  * Alias for [removeDomEvent]{@link DomUtil.removeDomEvent}
@@ -521,4 +517,4 @@ export const on = addDomEvent;
  * @return {DomUtil}
  * @memberOf DomUtil
  */
-export const off = removeDomEvent;
+export const off = removeDomEvent

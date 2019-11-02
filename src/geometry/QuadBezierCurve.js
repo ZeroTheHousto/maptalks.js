@@ -1,5 +1,5 @@
-import Curve from './Curve';
-import Canvas from '../core/Canvas';
+import Curve from './Curve'
+import Canvas from '../core/Canvas'
 
 /**
  * @classdesc
@@ -22,35 +22,34 @@ import Canvas from '../core/Canvas';
  * ).addTo(layer);
  */
 class QuadBezierCurve extends Curve {
+  static fromJSON (json) {
+    const feature = json.feature
+    const curve = new QuadBezierCurve(feature.geometry.coordinates, json.options)
+    curve.setProperties(feature.properties)
+    return curve
+  }
 
-    static fromJSON(json) {
-        const feature = json['feature'];
-        const curve = new QuadBezierCurve(feature['geometry']['coordinates'], json['options']);
-        curve.setProperties(feature['properties']);
-        return curve;
+  _toJSON (options) {
+    return {
+      feature: this.toGeoJSON(options),
+      subType: 'QuadBezierCurve'
     }
+  }
 
-    _toJSON(options) {
-        return {
-            'feature': this.toGeoJSON(options),
-            'subType': 'QuadBezierCurve'
-        };
-    }
+  // paint method on canvas
+  _paintOn (ctx, points, lineOpacity) {
+    ctx.beginPath()
+    ctx.moveTo(points[0].x, points[0].y)
+    this._quadraticCurve(ctx, points, lineOpacity)
+    Canvas._stroke(ctx, lineOpacity)
+    this._paintArrow(ctx, points, lineOpacity)
+  }
 
-    // paint method on canvas
-    _paintOn(ctx, points, lineOpacity) {
-        ctx.beginPath();
-        ctx.moveTo(points[0].x, points[0].y);
-        this._quadraticCurve(ctx, points, lineOpacity);
-        Canvas._stroke(ctx, lineOpacity);
-        this._paintArrow(ctx, points, lineOpacity);
-    }
-
-    _getArrowPoints(arrows, segments, lineWidth, arrowStyle, tolerance) {
-        return this._getCurveArrowPoints(arrows, segments, lineWidth, arrowStyle, tolerance, 2);
-    }
+  _getArrowPoints (arrows, segments, lineWidth, arrowStyle, tolerance) {
+    return this._getCurveArrowPoints(arrows, segments, lineWidth, arrowStyle, tolerance, 2)
+  }
 }
 
-QuadBezierCurve.registerJSONType('QuadBezierCurve');
+QuadBezierCurve.registerJSONType('QuadBezierCurve')
 
-export default QuadBezierCurve;
+export default QuadBezierCurve

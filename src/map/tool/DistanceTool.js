@@ -1,11 +1,11 @@
-import { isArrayHasData, UID } from '../../core/util';
-import { extendSymbol } from '../../core/util/style';
-import Size from '../../geo/Size';
-import Geometry from '../../geometry/Geometry';
-import Marker from '../../geometry/Marker';
-import Label from '../../geometry/Label';
-import VectorLayer from '../../layer/VectorLayer';
-import DrawTool from './DrawTool';
+import { isArrayHasData, UID } from '../../core/util'
+import { extendSymbol } from '../../core/util/style'
+import Size from '../../geo/Size'
+import Geometry from '../../geometry/Geometry'
+import Marker from '../../geometry/Marker'
+import Label from '../../geometry/Label'
+import VectorLayer from '../../layer/VectorLayer'
+import DrawTool from './DrawTool'
 
 /**
  * @property {options} options
@@ -19,56 +19,55 @@ import DrawTool from './DrawTool';
  * @instance
  */
 const options = {
-    'mode': 'LineString',
-    'language': 'zh-CN', //'en-US'
-    'metric': true,
-    'imperial': false,
-    'symbol': {
-        'lineColor': '#000',
-        'lineWidth': 3,
-        'lineOpacity': 1
+  mode: 'LineString',
+  language: 'zh-CN', // 'en-US'
+  metric: true,
+  imperial: false,
+  symbol: {
+    lineColor: '#000',
+    lineWidth: 3,
+    lineOpacity: 1
+  },
+  vertexSymbol: {
+    markerType: 'ellipse',
+    markerFill: '#fff',
+    markerLineColor: '#000',
+    markerLineWidth: 3,
+    markerWidth: 11,
+    markerHeight: 11
+  },
+  labelOptions: {
+    textSymbol: {
+      textFaceName: 'monospace',
+      textLineSpacing: 1,
+      textHorizontalAlignment: 'right',
+      textDx: 15
     },
-    'vertexSymbol': {
-        'markerType': 'ellipse',
-        'markerFill': '#fff',
-        'markerLineColor': '#000',
-        'markerLineWidth': 3,
-        'markerWidth': 11,
-        'markerHeight': 11
-    },
-    'labelOptions': {
-        'textSymbol': {
-            'textFaceName': 'monospace',
-            'textLineSpacing': 1,
-            'textHorizontalAlignment': 'right',
-            'textDx': 15
-        },
-        'boxStyle' : {
-            'padding' : [6, 2],
-            'symbol' : {
-                'markerType' : 'square',
-                'markerFill' : '#fff',
-                'markerFillOpacity' : 0.9,
-                'markerLineColor' : '#b4b3b3',
-            }
-        }
-    },
-    'clearButtonSymbol' :[{
-        'markerType': 'square',
-        'markerFill': '#fff',
-        'markerLineColor': '#b4b3b3',
-        'markerLineWidth': 2,
-        'markerWidth': 15,
-        'markerHeight': 15,
-        'markerDx': 20
-    }, {
-        'markerType': 'x',
-        'markerWidth': 10,
-        'markerHeight': 10,
-        'markerDx': 20
-    }]
-};
-
+    boxStyle: {
+      padding: [6, 2],
+      symbol: {
+        markerType: 'square',
+        markerFill: '#fff',
+        markerFillOpacity: 0.9,
+        markerLineColor: '#b4b3b3'
+      }
+    }
+  },
+  clearButtonSymbol: [{
+    markerType: 'square',
+    markerFill: '#fff',
+    markerLineColor: '#b4b3b3',
+    markerLineWidth: 2,
+    markerWidth: 15,
+    markerHeight: 15,
+    markerDx: 20
+  }, {
+    markerType: 'x',
+    markerWidth: 10,
+    markerHeight: 10,
+    markerDx: 20
+  }]
+}
 
 /**
  * A map tool to help measure distance on the map
@@ -94,8 +93,7 @@ const options = {
  *
  */
 class DistanceTool extends DrawTool {
-
-    /**
+  /**
      * @param {options} [options=null] - construct options
      * @param {String} [options.language=zh-CN]         - language of the distance tool, zh-CN or en-US
      * @param {Boolean} [options.metric=true]           - display result in metric system
@@ -104,209 +102,208 @@ class DistanceTool extends DrawTool {
      * @param {Object}  [options.vertexSymbol=null]     - symbol of the vertice
      * @param {Object}  [options.labelOptions=null]     - construct options of the vertice labels.
      */
-    constructor(options) {
-        super(options);
-        this.on('enable', this._afterEnable, this)
-            .on('disable', this._afterDisable, this);
-        this._measureLayers = [];
-    }
+  constructor (options) {
+    super(options)
+    this.on('enable', this._afterEnable, this)
+      .on('disable', this._afterDisable, this)
+    this._measureLayers = []
+  }
 
-    /**
+  /**
      * Clear the measurements
      * @return {DistanceTool} this
      */
-    clear() {
-        if (isArrayHasData(this._measureLayers)) {
-            for (let i = 0; i < this._measureLayers.length; i++) {
-                this._measureLayers[i].remove();
-            }
-        }
-        delete this._lastMeasure;
-        delete this._lastVertex;
-        this._measureLayers = [];
-        return this;
+  clear () {
+    if (isArrayHasData(this._measureLayers)) {
+      for (let i = 0; i < this._measureLayers.length; i++) {
+        this._measureLayers[i].remove()
+      }
     }
+    delete this._lastMeasure
+    delete this._lastVertex
+    this._measureLayers = []
+    return this
+  }
 
-    /**
+  /**
      * Get the VectorLayers with the geometries drawn on the map during measuring.
      * @return {Layer[]}
      */
-    getMeasureLayers() {
-        return this._measureLayers;
-    }
+  getMeasureLayers () {
+    return this._measureLayers
+  }
 
-    /**
+  /**
      * Get last measuring result
      * @return {Number}
      */
-    getLastMeasure() {
-        if (!this._lastMeasure) {
-            return 0;
+  getLastMeasure () {
+    if (!this._lastMeasure) {
+      return 0
+    }
+    return this._lastMeasure
+  }
+
+  _measure (toMeasure) {
+    const map = this.getMap()
+    let length
+    if (toMeasure instanceof Geometry) {
+      length = map.computeGeometryLength(toMeasure)
+    } else if (Array.isArray(toMeasure)) {
+      length = map.getProjection().measureLength(toMeasure)
+    }
+    this._lastMeasure = length
+    let units
+    if (this.options.language === 'zh-CN') {
+      units = [' 米', ' 公里', ' 英尺', ' 英里']
+    } else {
+      units = [' m', ' km', ' feet', ' mile']
+    }
+    let content = ''
+    if (this.options.metric) {
+      content += length < 1000 ? length.toFixed(0) + units[0] : (length / 1000).toFixed(2) + units[1]
+    }
+    if (this.options.imperial) {
+      length *= 3.2808399
+      if (content.length > 0) {
+        content += '\n'
+      }
+      content += length < 5280 ? length.toFixed(0) + units[2] : (length / 5280).toFixed(2) + units[3]
+    }
+    return content
+  }
+
+  _registerMeasureEvents () {
+    this.on('drawstart', this._msOnDrawStart, this)
+      .on('drawvertex', this._msOnDrawVertex, this)
+      .on('mousemove', this._msOnMouseMove, this)
+      .on('drawend', this._msOnDrawEnd, this)
+  }
+
+  _afterEnable () {
+    this._registerMeasureEvents()
+  }
+
+  _afterDisable () {
+    this.off('drawstart', this._msOnDrawStart, this)
+      .off('drawvertex', this._msOnDrawVertex, this)
+      .off('mousemove', this._msOnMouseMove, this)
+      .off('drawend', this._msOnDrawEnd, this)
+  }
+
+  _msOnDrawStart (param) {
+    const map = this.getMap()
+    const uid = UID()
+    const layerId = 'distancetool_' + uid
+    const markerLayerId = 'distancetool_markers_' + uid
+    if (!map.getLayer(layerId)) {
+      this._measureLineLayer = new VectorLayer(layerId).addTo(map)
+      this._measureMarkerLayer = new VectorLayer(markerLayerId).addTo(map)
+    } else {
+      this._measureLineLayer = map.getLayer(layerId)
+      this._measureMarkerLayer = map.getLayer(markerLayerId)
+    }
+    this._measureLayers.push(this._measureLineLayer)
+    this._measureLayers.push(this._measureMarkerLayer)
+    // start marker
+    new Marker(param.coordinate, {
+      symbol: this.options.vertexSymbol
+    }).addTo(this._measureMarkerLayer)
+    const content = (this.options.language === 'zh-CN' ? '起点' : 'start')
+    const startLabel = new Label(content, param.coordinate, this.options.labelOptions)
+    this._lastVertex = startLabel
+    this._measureMarkerLayer.addGeometry(startLabel)
+  }
+
+  _msOnMouseMove (param) {
+    const ms = this._measure(this._msGetCoordsToMeasure(param))
+    if (!this._tailMarker) {
+      const symbol = extendSymbol(this.options.vertexSymbol)
+      symbol.markerWidth /= 2
+      symbol.markerHeight /= 2
+      this._tailMarker = new Marker(param.coordinate, {
+        symbol: symbol
+      }).addTo(this._measureMarkerLayer)
+      this._tailLabel = new Label(ms, param.coordinate, this.options.labelOptions)
+        .addTo(this._measureMarkerLayer)
+    }
+    this._tailMarker.setCoordinates(param.coordinate)
+    this._tailLabel.setContent(ms)
+    this._tailLabel.setCoordinates(param.coordinate)
+  }
+
+  _msGetCoordsToMeasure (param) {
+    return param.geometry.getCoordinates().concat([param.coordinate])
+  }
+
+  _msOnDrawVertex (param) {
+    const geometry = param.geometry
+    // vertex marker
+    new Marker(param.coordinate, {
+      symbol: this.options.vertexSymbol
+    }).addTo(this._measureMarkerLayer)
+    const length = this._measure(geometry)
+    const vertexLabel = new Label(length, param.coordinate, this.options.labelOptions)
+    this._measureMarkerLayer.addGeometry(vertexLabel)
+    this._lastVertex = vertexLabel
+  }
+
+  _msOnDrawEnd (param) {
+    this._clearTailMarker()
+    let size = this._lastVertex.getSize()
+    if (!size) {
+      size = new Size(10, 10)
+    }
+    this._addClearMarker(this._lastVertex.getCoordinates(), size.width)
+    const geo = param.geometry.copy()
+    geo.addTo(this._measureLineLayer)
+    this._lastMeasure = geo.getLength()
+  }
+
+  _addClearMarker (coordinates, dx) {
+    let symbol = this.options.clearButtonSymbol
+    let dxSymbol = {
+      markerDx: (symbol.markerDx || 0) + dx,
+      textDx: (symbol.textDx || 0) + dx
+    }
+    if (Array.isArray(symbol)) {
+      dxSymbol = symbol.map(s => {
+        if (s) {
+          return {
+            markerDx: (s.markerDx || 0) + dx,
+            textDx: (s.textDx || 0) + dx
+          }
         }
-        return this._lastMeasure;
+        return null
+      })
     }
+    symbol = extendSymbol(symbol, dxSymbol)
+    const endMarker = new Marker(coordinates, {
+      symbol: symbol
+    })
+    const measureLineLayer = this._measureLineLayer
+    const measureMarkerLayer = this._measureMarkerLayer
+    endMarker.on('click', function () {
+      measureLineLayer.remove()
+      measureMarkerLayer.remove()
+      // return false to stop propagation of event.
+      return false
+    }, this)
+    endMarker.addTo(this._measureMarkerLayer)
+  }
 
-    _measure(toMeasure) {
-        const map = this.getMap();
-        let length;
-        if (toMeasure instanceof Geometry) {
-            length = map.computeGeometryLength(toMeasure);
-        } else if (Array.isArray(toMeasure)) {
-            length = map.getProjection().measureLength(toMeasure);
-        }
-        this._lastMeasure = length;
-        let units;
-        if (this.options['language'] === 'zh-CN') {
-            units = [' 米', ' 公里', ' 英尺', ' 英里'];
-        } else {
-            units = [' m', ' km', ' feet', ' mile'];
-        }
-        let content = '';
-        if (this.options['metric']) {
-            content += length < 1000 ? length.toFixed(0) + units[0] : (length / 1000).toFixed(2) + units[1];
-        }
-        if (this.options['imperial']) {
-            length *= 3.2808399;
-            if (content.length > 0) {
-                content += '\n';
-            }
-            content += length < 5280 ? length.toFixed(0) + units[2] : (length / 5280).toFixed(2) + units[3];
-        }
-        return content;
+  _clearTailMarker () {
+    if (this._tailMarker) {
+      this._tailMarker.remove()
+      delete this._tailMarker
     }
-
-    _registerMeasureEvents() {
-        this.on('drawstart', this._msOnDrawStart, this)
-            .on('drawvertex', this._msOnDrawVertex, this)
-            .on('mousemove', this._msOnMouseMove, this)
-            .on('drawend', this._msOnDrawEnd, this);
+    if (this._tailLabel) {
+      this._tailLabel.remove()
+      delete this._tailLabel
     }
-
-    _afterEnable() {
-        this._registerMeasureEvents();
-    }
-
-    _afterDisable() {
-        this.off('drawstart', this._msOnDrawStart, this)
-            .off('drawvertex', this._msOnDrawVertex, this)
-            .off('mousemove', this._msOnMouseMove, this)
-            .off('drawend', this._msOnDrawEnd, this);
-    }
-
-    _msOnDrawStart(param) {
-        const map = this.getMap();
-        const uid = UID();
-        const layerId = 'distancetool_' + uid;
-        const markerLayerId = 'distancetool_markers_' + uid;
-        if (!map.getLayer(layerId)) {
-            this._measureLineLayer = new VectorLayer(layerId).addTo(map);
-            this._measureMarkerLayer = new VectorLayer(markerLayerId).addTo(map);
-        } else {
-            this._measureLineLayer = map.getLayer(layerId);
-            this._measureMarkerLayer = map.getLayer(markerLayerId);
-        }
-        this._measureLayers.push(this._measureLineLayer);
-        this._measureLayers.push(this._measureMarkerLayer);
-        //start marker
-        new Marker(param['coordinate'], {
-            'symbol': this.options['vertexSymbol']
-        }).addTo(this._measureMarkerLayer);
-        const content = (this.options['language'] === 'zh-CN' ? '起点' : 'start');
-        const startLabel = new Label(content, param['coordinate'], this.options['labelOptions']);
-        this._lastVertex = startLabel;
-        this._measureMarkerLayer.addGeometry(startLabel);
-    }
-
-    _msOnMouseMove(param) {
-        const ms = this._measure(this._msGetCoordsToMeasure(param));
-        if (!this._tailMarker) {
-            const symbol = extendSymbol(this.options['vertexSymbol']);
-            symbol['markerWidth'] /= 2;
-            symbol['markerHeight'] /= 2;
-            this._tailMarker = new Marker(param['coordinate'], {
-                'symbol': symbol
-            }).addTo(this._measureMarkerLayer);
-            this._tailLabel = new Label(ms, param['coordinate'], this.options['labelOptions'])
-                .addTo(this._measureMarkerLayer);
-        }
-        this._tailMarker.setCoordinates(param['coordinate']);
-        this._tailLabel.setContent(ms);
-        this._tailLabel.setCoordinates(param['coordinate']);
-    }
-
-    _msGetCoordsToMeasure(param) {
-        return param['geometry'].getCoordinates().concat([param['coordinate']]);
-    }
-
-    _msOnDrawVertex(param) {
-        const geometry = param['geometry'];
-        //vertex marker
-        new Marker(param['coordinate'], {
-            'symbol': this.options['vertexSymbol']
-        }).addTo(this._measureMarkerLayer);
-        const length = this._measure(geometry);
-        const vertexLabel = new Label(length, param['coordinate'], this.options['labelOptions']);
-        this._measureMarkerLayer.addGeometry(vertexLabel);
-        this._lastVertex = vertexLabel;
-    }
-
-    _msOnDrawEnd(param) {
-        this._clearTailMarker();
-        let size = this._lastVertex.getSize();
-        if (!size) {
-            size = new Size(10, 10);
-        }
-        this._addClearMarker(this._lastVertex.getCoordinates(), size['width']);
-        const geo = param['geometry'].copy();
-        geo.addTo(this._measureLineLayer);
-        this._lastMeasure = geo.getLength();
-    }
-
-    _addClearMarker(coordinates, dx) {
-        let symbol = this.options['clearButtonSymbol'];
-        let dxSymbol = {
-            'markerDx' : (symbol['markerDx'] || 0) + dx,
-            'textDx' : (symbol['textDx'] || 0) + dx
-        };
-        if (Array.isArray(symbol)) {
-            dxSymbol = symbol.map(s => {
-                if (s) {
-                    return {
-                        'markerDx' : (s['markerDx'] || 0) + dx,
-                        'textDx' : (s['textDx'] || 0) + dx
-                    };
-                }
-                return null;
-            });
-        }
-        symbol = extendSymbol(symbol, dxSymbol);
-        const endMarker = new Marker(coordinates, {
-            'symbol': symbol
-        });
-        const measureLineLayer = this._measureLineLayer,
-            measureMarkerLayer = this._measureMarkerLayer;
-        endMarker.on('click', function () {
-            measureLineLayer.remove();
-            measureMarkerLayer.remove();
-            //return false to stop propagation of event.
-            return false;
-        }, this);
-        endMarker.addTo(this._measureMarkerLayer);
-    }
-
-    _clearTailMarker() {
-        if (this._tailMarker) {
-            this._tailMarker.remove();
-            delete this._tailMarker;
-        }
-        if (this._tailLabel) {
-            this._tailLabel.remove();
-            delete this._tailLabel;
-        }
-    }
-
+  }
 }
 
-DistanceTool.mergeOptions(options);
+DistanceTool.mergeOptions(options)
 
-export default DistanceTool;
+export default DistanceTool

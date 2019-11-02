@@ -1,5 +1,5 @@
-import MultiGeometry from './MultiGeometry';
-import Marker from './Marker';
+import MultiGeometry from './MultiGeometry'
+import Marker from './Marker'
 
 /**
  * @classdesc
@@ -16,44 +16,43 @@ import Marker from './Marker';
  * ).addTo(layer);
  */
 class MultiPoint extends MultiGeometry {
-
-    /**
+  /**
      * @param {Number[][]|Coordinate[]|Marker[]} data - construct data, coordinates or an array of markers
      * @param {Object} [options=null] - options defined in [nMultiPoint]{@link MultiPoint#options}
      */
-    constructor(data, opts) {
-        super(Marker, 'MultiPoint', data, opts);
-    }
+  constructor (data, opts) {
+    super(Marker, 'MultiPoint', data, opts)
+  }
 
-    /**
+  /**
      * Find the closet point to the give coordinate
      * @param {Coordinate} coordinate coordinate
      * @returns {Coordinate} coordinate
      */
-    findClosest(coordinate) {
-        if (!coordinate) {
-            return null;
-        }
-        const coords = this.getCoordinates();
-        let hit = null;
-        let max = Infinity;
-        coords.forEach(c => {
-            const dist = distanceTo(c, coordinate);
-            if (dist < max) {
-                hit = c;
-                max = dist;
-            }
-        });
-        return hit;
+  findClosest (coordinate) {
+    if (!coordinate) {
+      return null
     }
+    const coords = this.getCoordinates()
+    let hit = null
+    let max = Infinity
+    coords.forEach(c => {
+      const dist = distanceTo(c, coordinate)
+      if (dist < max) {
+        hit = c
+        max = dist
+      }
+    })
+    return hit
+  }
 }
 
-MultiPoint.registerJSONType('MultiPoint');
+MultiPoint.registerJSONType('MultiPoint')
 
-export default MultiPoint;
+export default MultiPoint
 
-function distanceTo(p0, p1) {
-    const x = p1.x - p0.x,
-        y = p1.y - p0.y;
-    return Math.sqrt(x * x + y * y);
+function distanceTo (p0, p1) {
+  const x = p1.x - p0.x
+  const y = p1.y - p0.y
+  return Math.sqrt(x * x + y * y)
 }

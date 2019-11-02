@@ -1,5 +1,5 @@
-import MultiPath from './MultiPath';
-import LineString from './LineString';
+import MultiPath from './MultiPath'
+import LineString from './LineString'
 
 /**
  * @classdesc
@@ -33,16 +33,15 @@ import LineString from './LineString';
  * ).addTo(layer);
  */
 class MultiLineString extends MultiPath {
-
-    /**
+  /**
      * @param {Number[][][]|Coordinate[][]|LineString[]} data - construct data, coordinates or an array of linestrings
      * @param {Object} [options=null]           - options defined in [MultiLineString]{@link MultiLineString#options}
      */
-    constructor(data, options) {
-        super(LineString, 'MultiLineString', data, options);
-    }
+  constructor (data, options) {
+    super(LineString, 'MultiLineString', data, options)
+  }
 }
 
-MultiLineString.registerJSONType('MultiLineString');
+MultiLineString.registerJSONType('MultiLineString')
 
-export default MultiLineString;
+export default MultiLineString

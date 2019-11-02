@@ -1,10 +1,10 @@
-import Class from '../core/Class';
-import { isNil, isNumber } from '../core/util';
-import Eventable from '../core/Eventable';
-import JSONAble from '../core/JSONAble';
-import Renderable from '../renderer/Renderable';
-import CanvasRenderer from '../renderer/layer/CanvasRenderer';
-import CollisionIndex from '../core/CollisionIndex';
+import Class from '../core/Class'
+import { isNil, isNumber } from '../core/util'
+import Eventable from '../core/Eventable'
+import JSONAble from '../core/JSONAble'
+import Renderable from '../renderer/Renderable'
+import CanvasRenderer from '../renderer/layer/CanvasRenderer'
+import CollisionIndex from '../core/CollisionIndex'
 
 /**
  * @property {Object}  [options=null] - base options of layer.
@@ -27,22 +27,22 @@ import CollisionIndex from '../core/CollisionIndex';
  * @instance
  */
 const options = {
-    'attribution': null,
-    'minZoom': null,
-    'maxZoom': null,
-    'visible': true,
-    'opacity': 1,
-    // context.globalCompositeOperation, 'source-over' in default
-    'globalCompositeOperation': null,
-    'renderer': 'canvas',
-    'debugOutline' : '#0f0',
-    'cssFilter': null,
-    'forceRenderOnMoving' : false,
-    'forceRenderOnZooming' : false,
-    'forceRenderOnRotating' : false,
-    'collision' : false,
-    'collisionScope' : 'layer'
-};
+  attribution: null,
+  minZoom: null,
+  maxZoom: null,
+  visible: true,
+  opacity: 1,
+  // context.globalCompositeOperation, 'source-over' in default
+  globalCompositeOperation: null,
+  renderer: 'canvas',
+  debugOutline: '#0f0',
+  cssFilter: null,
+  forceRenderOnMoving: false,
+  forceRenderOnZooming: false,
+  forceRenderOnRotating: false,
+  collision: false,
+  collisionScope: 'layer'
+}
 
 /**
  * @classdesc
@@ -57,63 +57,62 @@ const options = {
  * @mixes Renderable
  */
 class Layer extends JSONAble(Eventable(Renderable(Class))) {
-
-    constructor(id, options) {
-        let canvas;
-        if (options) {
-            canvas = options.canvas;
-            delete options.canvas;
-        }
-        super(options);
-        this._canvas = canvas;
-        this.setId(id);
-        if (options) {
-            this.setZIndex(options.zIndex);
-        }
+  constructor (id, options) {
+    let canvas
+    if (options) {
+      canvas = options.canvas
+      delete options.canvas
     }
+    super(options)
+    this._canvas = canvas
+    this.setId(id)
+    if (options) {
+      this.setZIndex(options.zIndex)
+    }
+  }
 
-    /**
+  /**
      * load the tile layer, can't be overrided by sub-classes
      */
-    load() {
-        if (!this.getMap()) {
-            return this;
-        }
-        if (this.onLoad()) {
-            this._initRenderer();
-            const zIndex = this.getZIndex();
-            if (!isNil(zIndex)) {
-                this._renderer.setZIndex(zIndex);
-                if (!this.isCanvasRender()) {
-                    this._renderer.render();
-                }
-            }
-            this.onLoadEnd();
-        }
-        return this;
+  load () {
+    if (!this.getMap()) {
+      return this
     }
+    if (this.onLoad()) {
+      this._initRenderer()
+      const zIndex = this.getZIndex()
+      if (!isNil(zIndex)) {
+        this._renderer.setZIndex(zIndex)
+        if (!this.isCanvasRender()) {
+          this._renderer.render()
+        }
+      }
+      this.onLoadEnd()
+    }
+    return this
+  }
 
-    /**
+  /**
      * Get the layer id
      * @returns {String} id
      */
-    getId() {
-        return this._id;
-    }
+  getId () {
+    return this._id
+  }
 
-    /**
+  /**
      * Set a new id to the layer
      * @param {String} id - new layer id
      * @return {Layer} this
      * @fires Layer#idchange
      */
-    setId(id) {
-        const old = this._id;
-        if (!isNil(id)) {
-            id = id + '';
-        }
-        this._id = id;
-        /**
+  setId (id) {
+    const old = this._id
+    if (!isNil(id)) {
+      id = id + ''
+    }
+    this._id = id
+    /**
          * idchange event.
          *
          * @event Layer#idchange
@@ -123,404 +122,404 @@ class Layer extends JSONAble(Eventable(Renderable(Class))) {
          * @property {String} old        - value of the old id
          * @property {String} new        - value of the new id
          */
-        this.fire('idchange', {
-            'old': old,
-            'new': id
-        });
-        return this;
-    }
+    this.fire('idchange', {
+      old: old,
+      new: id
+    })
+    return this
+  }
 
-    /**
+  /**
      * Adds itself to a map.
      * @param {Map} map - map added to
      * @return {Layer} this
      */
-    addTo(map) {
-        map.addLayer(this);
-        return this;
-    }
+  addTo (map) {
+    map.addLayer(this)
+    return this
+  }
 
-    /**
+  /**
      * Set a z-index to the layer
      * @param {Number} zIndex - layer's z-index
      * @return {Layer} this
      */
-    setZIndex(zIndex) {
-        this._zIndex = zIndex;
-        if (isNil(zIndex)) {
-            delete this.options['zIndex'];
-        } else {
-            this.options.zIndex = zIndex;
-        }
-        if (this.map) {
-            this.map._sortLayersByZIndex();
-        }
-        if (this._renderer) {
-            this._renderer.setZIndex(zIndex);
-        }
-        return this;
+  setZIndex (zIndex) {
+    this._zIndex = zIndex
+    if (isNil(zIndex)) {
+      delete this.options.zIndex
+    } else {
+      this.options.zIndex = zIndex
     }
+    if (this.map) {
+      this.map._sortLayersByZIndex()
+    }
+    if (this._renderer) {
+      this._renderer.setZIndex(zIndex)
+    }
+    return this
+  }
 
-    /**
+  /**
      * Get the layer's z-index
      * @return {Number}
      */
-    getZIndex() {
-        return this._zIndex || 0;
-    }
+  getZIndex () {
+    return this._zIndex || 0
+  }
 
-    /**
+  /**
      * Get Layer's minZoom to display
      * @return {Number}
      */
-    getMinZoom() {
-        const map = this.getMap();
-        const minZoom = this.options['minZoom'];
-        return map ? Math.max(map.getMinZoom(), minZoom || 0) : minZoom;
-    }
+  getMinZoom () {
+    const map = this.getMap()
+    const minZoom = this.options.minZoom
+    return map ? Math.max(map.getMinZoom(), minZoom || 0) : minZoom
+  }
 
-    /**
+  /**
      * Get Layer's maxZoom to display
      * @return {Number}
      */
-    getMaxZoom() {
-        const map = this.getMap();
-        const maxZoom = this.options['maxZoom'];
-        return map ? Math.min(map.getMaxZoom(), isNil(maxZoom) ? Infinity : maxZoom) : maxZoom;
-    }
+  getMaxZoom () {
+    const map = this.getMap()
+    const maxZoom = this.options.maxZoom
+    return map ? Math.min(map.getMaxZoom(), isNil(maxZoom) ? Infinity : maxZoom) : maxZoom
+  }
 
-    /**
+  /**
      * Get layer's opacity
      * @returns {Number}
      */
-    getOpacity() {
-        return this.options['opacity'];
-    }
+  getOpacity () {
+    return this.options.opacity
+  }
 
-    /**
+  /**
      * Set opacity to the layer
      * @param {Number} opacity - layer's opacity
      * @return {Layer} this
      */
-    setOpacity(op) {
-        this.config('opacity', op);
-        return this;
-    }
+  setOpacity (op) {
+    this.config('opacity', op)
+    return this
+  }
 
-    /**
+  /**
      * If the layer is rendered by HTML5 Canvas.
      * @return {Boolean}
      * @protected
      */
-    isCanvasRender() {
-        const renderer = this._getRenderer();
-        return (renderer && (renderer instanceof CanvasRenderer));
-    }
+  isCanvasRender () {
+    const renderer = this._getRenderer()
+    return (renderer && (renderer instanceof CanvasRenderer))
+  }
 
-    /**
+  /**
      * Get the map that the layer added to
      * @returns {Map}
      */
-    getMap() {
-        if (this.map) {
-            return this.map;
-        }
-        return null;
+  getMap () {
+    if (this.map) {
+      return this.map
     }
+    return null
+  }
 
-    /**
+  /**
      * Get projection of layer's map
      * @returns {Object}
      */
-    getProjection() {
-        const map = this.getMap();
-        return map ? map.getProjection() : null;
-    }
+  getProjection () {
+    const map = this.getMap()
+    return map ? map.getProjection() : null
+  }
 
-    /**
+  /**
      * Brings the layer to the top of all the layers
      * @returns {Layer} this
      */
-    bringToFront() {
-        const layers = this._getLayerList();
-        if (!layers.length) {
-            return this;
-        }
-        const topLayer = layers[layers.length - 1];
-        if (layers.length === 1 || topLayer === this) {
-            return this;
-        }
-        const max = topLayer.getZIndex();
-        this.setZIndex(max + 1);
-        return this;
+  bringToFront () {
+    const layers = this._getLayerList()
+    if (!layers.length) {
+      return this
     }
+    const topLayer = layers[layers.length - 1]
+    if (layers.length === 1 || topLayer === this) {
+      return this
+    }
+    const max = topLayer.getZIndex()
+    this.setZIndex(max + 1)
+    return this
+  }
 
-    /**
+  /**
      * Brings the layer under the bottom of all the layers
      * @returns {Layer} this
      */
-    bringToBack() {
-        const layers = this._getLayerList();
-        if (!layers.length) {
-            return this;
-        }
-        const bottomLayer = layers[0];
-        if (layers.length === 1 || bottomLayer === this) {
-            return this;
-        }
-        const min = bottomLayer.getZIndex();
-        this.setZIndex(min - 1);
-        return this;
+  bringToBack () {
+    const layers = this._getLayerList()
+    if (!layers.length) {
+      return this
     }
+    const bottomLayer = layers[0]
+    if (layers.length === 1 || bottomLayer === this) {
+      return this
+    }
+    const min = bottomLayer.getZIndex()
+    this.setZIndex(min - 1)
+    return this
+  }
 
-    /**
+  /**
      * Show the layer
      * @returns {Layer} this
      */
-    show() {
-        if (!this.options['visible']) {
-            this.options['visible'] = true;
-            const renderer = this.getRenderer();
-            if (renderer) {
-                renderer.show();
-            }
+  show () {
+    if (!this.options.visible) {
+      this.options.visible = true
+      const renderer = this.getRenderer()
+      if (renderer) {
+        renderer.show()
+      }
 
-            const map = this.getMap();
-            if (renderer && map) {
-                //fire show at renderend to make sure layer is shown
-                map.once('renderend', () => {
-                    this.fire('show');
-                });
-            } else {
-                this.fire('show');
-            }
-        }
-        return this;
+      const map = this.getMap()
+      if (renderer && map) {
+        // fire show at renderend to make sure layer is shown
+        map.once('renderend', () => {
+          this.fire('show')
+        })
+      } else {
+        this.fire('show')
+      }
     }
+    return this
+  }
 
-    /**
+  /**
      * Hide the layer
      * @returns {Layer} this
      */
-    hide() {
-        if (this.options['visible']) {
-            this.options['visible'] = false;
-            const renderer = this.getRenderer();
-            if (renderer) {
-                renderer.hide();
-            }
+  hide () {
+    if (this.options.visible) {
+      this.options.visible = false
+      const renderer = this.getRenderer()
+      if (renderer) {
+        renderer.hide()
+      }
 
-            const map = this.getMap();
-            if (renderer && map) {
-                //fire hide at renderend to make sure layer is hidden
-                map.once('renderend', () => {
-                    this.fire('hide');
-                });
-            } else {
-                this.fire('hide');
-            }
-        }
-        // this.fire('hide');
-        return this;
+      const map = this.getMap()
+      if (renderer && map) {
+        // fire hide at renderend to make sure layer is hidden
+        map.once('renderend', () => {
+          this.fire('hide')
+        })
+      } else {
+        this.fire('hide')
+      }
     }
+    // this.fire('hide');
+    return this
+  }
 
-    /**
+  /**
      * Whether the layer is visible now.
      * @return {Boolean}
      */
-    isVisible() {
-        if (isNumber(this.options['opacity']) && this.options['opacity'] <= 0) {
-            return false;
-        }
-        const map = this.getMap();
-        if (map) {
-            const zoom = map.getZoom();
-            if ((!isNil(this.options['maxZoom']) && this.options['maxZoom'] < zoom) ||
-                (!isNil(this.options['minZoom']) && this.options['minZoom'] > zoom)) {
-                return false;
-            }
-        }
-
-        if (isNil(this.options['visible'])) {
-            this.options['visible'] = true;
-        }
-        return this.options['visible'];
+  isVisible () {
+    if (isNumber(this.options.opacity) && this.options.opacity <= 0) {
+      return false
+    }
+    const map = this.getMap()
+    if (map) {
+      const zoom = map.getZoom()
+      if ((!isNil(this.options.maxZoom) && this.options.maxZoom < zoom) ||
+                (!isNil(this.options.minZoom) && this.options.minZoom > zoom)) {
+        return false
+      }
     }
 
-    /**
+    if (isNil(this.options.visible)) {
+      this.options.visible = true
+    }
+    return this.options.visible
+  }
+
+  /**
      * Remove itself from the map added to.
      * @returns {Layer} this
      */
-    remove() {
-        if (this.map) {
-            this.map.removeLayer(this);
-        }
-        return this;
+  remove () {
+    if (this.map) {
+      this.map.removeLayer(this)
     }
+    return this
+  }
 
-    /**
+  /**
      * Get the mask geometry of the layer
      * @return {Geometry}
      */
-    getMask() {
-        return this._mask;
-    }
+  getMask () {
+    return this._mask
+  }
 
-    /**
+  /**
      * Set a mask geometry on the layer, only the area in the mask will be displayed.
      * @param {Geometry} mask - mask geometry, can only be a Marker with vector symbol, a Polygon or a MultiPolygon
      * @returns {Layer} this
      */
-    setMask(mask) {
-        if (!((mask.type === 'Point' && mask._isVectorMarker()) || mask.type === 'Polygon' || mask.type === 'MultiPolygon')) {
-            throw new Error('Mask for a layer must be a marker with vector marker symbol or a Polygon(MultiPolygon).');
-        }
-
-        if (mask.type === 'Point') {
-            mask.updateSymbol({
-                'markerLineColor': 'rgba(0, 0, 0, 0)',
-                'markerFillOpacity': 0
-            });
-        } else {
-            mask.setSymbol({
-                'lineColor': 'rgba(0, 0, 0, 0)',
-                'polygonOpacity': 0
-            });
-        }
-        mask._bindLayer(this);
-        this._mask = mask;
-        if (!this.getMap() || this.getMap().isZooming()) {
-            return this;
-        }
-        const renderer = this._getRenderer();
-        if (renderer && renderer.setToRedraw) {
-            this._getRenderer().setToRedraw();
-        }
-        return this;
+  setMask (mask) {
+    if (!((mask.type === 'Point' && mask._isVectorMarker()) || mask.type === 'Polygon' || mask.type === 'MultiPolygon')) {
+      throw new Error('Mask for a layer must be a marker with vector marker symbol or a Polygon(MultiPolygon).')
     }
 
-    /**
+    if (mask.type === 'Point') {
+      mask.updateSymbol({
+        markerLineColor: 'rgba(0, 0, 0, 0)',
+        markerFillOpacity: 0
+      })
+    } else {
+      mask.setSymbol({
+        lineColor: 'rgba(0, 0, 0, 0)',
+        polygonOpacity: 0
+      })
+    }
+    mask._bindLayer(this)
+    this._mask = mask
+    if (!this.getMap() || this.getMap().isZooming()) {
+      return this
+    }
+    const renderer = this._getRenderer()
+    if (renderer && renderer.setToRedraw) {
+      this._getRenderer().setToRedraw()
+    }
+    return this
+  }
+
+  /**
      * Remove the mask
      * @returns {Layer} this
      */
-    removeMask() {
-        delete this._mask;
-        if (!this.getMap() || this.getMap().isZooming()) {
-            return this;
-        }
-        const renderer = this._getRenderer();
-        if (renderer && renderer.setToRedraw) {
-            this._getRenderer().setToRedraw();
-        }
-        return this;
+  removeMask () {
+    delete this._mask
+    if (!this.getMap() || this.getMap().isZooming()) {
+      return this
     }
+    const renderer = this._getRenderer()
+    if (renderer && renderer.setToRedraw) {
+      this._getRenderer().setToRedraw()
+    }
+    return this
+  }
 
-    /**
+  /**
      * Prepare Layer's loading, this is a method intended to be overrided by subclasses.
      * @return {Boolean} true to continue loading, false to cease.
      * @protected
      */
-    onLoad() {
-        return true;
-    }
+  onLoad () {
+    return true
+  }
 
-    onLoadEnd() {
-    }
+  onLoadEnd () {
+  }
 
-    /**
+  /**
      * Whether the layer is loaded
      * @return {Boolean}
      */
-    isLoaded() {
-        return !!this._loaded;
-    }
+  isLoaded () {
+    return !!this._loaded
+  }
 
-    /**
+  /**
      * Get layer's collision index
      * @returns {CollisionIndex}
      */
-    getCollisionIndex() {
-        if (this.options['collisionScope'] === 'layer') {
-            if (!this._collisionIndex) {
-                this._collisionIndex = new CollisionIndex();
-            }
-            return this._collisionIndex;
-        }
-        const map = this.getMap();
-        if (!map) {
-            return null;
-        }
-        return map.getCollisionIndex();
+  getCollisionIndex () {
+    if (this.options.collisionScope === 'layer') {
+      if (!this._collisionIndex) {
+        this._collisionIndex = new CollisionIndex()
+      }
+      return this._collisionIndex
     }
+    const map = this.getMap()
+    if (!map) {
+      return null
+    }
+    return map.getCollisionIndex()
+  }
 
-    /**
+  /**
      * Clear layer's collision index.
      * Will ignore if collisionScope is not layer
      */
-    clearCollisionIndex() {
-        if (this.options['collisionScope'] === 'layer' &&
+  clearCollisionIndex () {
+    if (this.options.collisionScope === 'layer' &&
             this._collisionIndex) {
-            this._collisionIndex.clear();
-        }
-        return this;
+      this._collisionIndex.clear()
     }
+    return this
+  }
 
-    getRenderer() {
-        return this._getRenderer();
+  getRenderer () {
+    return this._getRenderer()
+  }
+
+  onConfig (conf) {
+    if (isNumber(conf.opacity) || conf.cssFilter) {
+      const renderer = this.getRenderer()
+      if (renderer) {
+        renderer.setToRedraw()
+      }
     }
+  }
 
-    onConfig(conf) {
-        if (isNumber(conf['opacity']) || conf['cssFilter']) {
-            const renderer = this.getRenderer();
-            if (renderer) {
-                renderer.setToRedraw();
-            }
-        }
+  onAdd () {}
+
+  onRendererCreate () {}
+
+  onCanvasCreate () {}
+
+  onRemove () {}
+
+  _bindMap (map, zIndex) {
+    if (!map) {
+      return
     }
-
-    onAdd() {}
-
-    onRendererCreate() {}
-
-    onCanvasCreate() {}
-
-    onRemove() {}
-
-    _bindMap(map, zIndex) {
-        if (!map) {
-            return;
-        }
-        this.map = map;
-        if (!isNil(zIndex)) {
-            this.setZIndex(zIndex);
-        }
-        this._switchEvents('on', this);
-
-        this.onAdd();
-
-        this.fire('add');
+    this.map = map
+    if (!isNil(zIndex)) {
+      this.setZIndex(zIndex)
     }
+    this._switchEvents('on', this)
 
-    _initRenderer() {
-        const renderer = this.options['renderer'];
-        if (!this.constructor.getRendererClass) {
-            return;
-        }
-        const clazz = this.constructor.getRendererClass(renderer);
-        if (!clazz) {
-            throw new Error('Invalid renderer for Layer(' + this.getId() + '):' + renderer);
-        }
-        this._renderer = new clazz(this);
-        this._renderer.layer = this;
-        this._renderer.setZIndex(this.getZIndex());
-        this._switchEvents('on', this._renderer);
-        // some plugin of dom renderer doesn't implement onAdd
-        if (this._renderer.onAdd) {
-            this._renderer.onAdd();
-        }
-        this.onRendererCreate();
+    this.onAdd()
 
-        /**
+    this.fire('add')
+  }
+
+  _initRenderer () {
+    const renderer = this.options.renderer
+    if (!this.constructor.getRendererClass) {
+      return
+    }
+    const clazz = this.constructor.getRendererClass(renderer)
+    if (!clazz) {
+      throw new Error('Invalid renderer for Layer(' + this.getId() + '):' + renderer)
+    }
+    this._renderer = new clazz(this)
+    this._renderer.layer = this
+    this._renderer.setZIndex(this.getZIndex())
+    this._switchEvents('on', this._renderer)
+    // some plugin of dom renderer doesn't implement onAdd
+    if (this._renderer.onAdd) {
+      this._renderer.onAdd()
+    }
+    this.onRendererCreate()
+
+    /**
          * renderercreate event, fired when renderer is created.
          *
          * @event Layer#renderercreate
@@ -529,71 +528,71 @@ class Layer extends JSONAble(Eventable(Renderable(Class))) {
          * @property {Layer} target    - the layer fires the event
          * @property {Any} renderer    - renderer of the layer
          */
-        this.fire('renderercreate', {
-            'renderer': this._renderer
-        });
-    }
+    this.fire('renderercreate', {
+      renderer: this._renderer
+    })
+  }
 
-    _doRemove() {
-        this._loaded = false;
-        this.onRemove();
+  _doRemove () {
+    this._loaded = false
+    this.onRemove()
 
-        this._switchEvents('off', this);
-        if (this._renderer) {
-            this._switchEvents('off', this._renderer);
-            this._renderer.remove();
-            delete this._renderer;
-        }
-        delete this.map;
-        delete this._collisionIndex;
+    this._switchEvents('off', this)
+    if (this._renderer) {
+      this._switchEvents('off', this._renderer)
+      this._renderer.remove()
+      delete this._renderer
     }
+    delete this.map
+    delete this._collisionIndex
+  }
 
-    _switchEvents(to, emitter) {
-        if (emitter && emitter.getEvents) {
-            this.getMap()[to](emitter.getEvents(), emitter);
-        }
+  _switchEvents (to, emitter) {
+    if (emitter && emitter.getEvents) {
+      this.getMap()[to](emitter.getEvents(), emitter)
     }
+  }
 
-    _getRenderer() {
-        return this._renderer;
-    }
+  _getRenderer () {
+    return this._renderer
+  }
 
-    _getLayerList() {
-        if (!this.map) {
-            return [];
-        }
-        return this.map._layers;
+  _getLayerList () {
+    if (!this.map) {
+      return []
     }
+    return this.map._layers
+  }
 
-    _getMask2DExtent() {
-        if (!this._mask || !this.getMap()) {
-            return null;
-        }
-        const painter = this._mask._getPainter();
-        if (!painter) {
-            return null;
-        }
-        return painter.get2DExtent();
+  _getMask2DExtent () {
+    if (!this._mask || !this.getMap()) {
+      return null
     }
+    const painter = this._mask._getPainter()
+    if (!painter) {
+      return null
+    }
+    return painter.get2DExtent()
+  }
 }
 
-Layer.mergeOptions(options);
+Layer.mergeOptions(options)
 
-const fire = Layer.prototype.fire;
+const fire = Layer.prototype.fire
 
 Layer.prototype.fire = function (eventType, param) {
-    if (eventType === 'layerload') {
-        this._loaded = true;
+  if (eventType === 'layerload') {
+    this._loaded = true
+  }
+  if (this.map) {
+    if (!param) {
+      param = {}
     }
-    if (this.map) {
-        if (!param) {
-            param = {};
-        }
-        param['type'] = eventType;
-        param['target'] = this;
-        this.map._onLayerEvent(param);
-    }
-    return fire.apply(this, arguments);
-};
+    param.type = eventType
+    param.target = this
+    this.map._onLayerEvent(param)
+  }
+  return fire.apply(this, arguments)
+}
 
-export default Layer;
+export default Layer

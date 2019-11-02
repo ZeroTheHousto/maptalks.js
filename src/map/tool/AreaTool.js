@@ -1,6 +1,6 @@
-import Size from '../../geo/Size';
-import { Geometry, Marker, Label } from '../../geometry';
-import DistanceTool from './DistanceTool';
+import Size from '../../geo/Size'
+import { Geometry, Marker, Label } from '../../geometry'
+import DistanceTool from './DistanceTool'
 
 /**
  * @property {options} options
@@ -14,16 +14,16 @@ import DistanceTool from './DistanceTool';
  * @instance
  */
 const options = {
-    'mode': 'Polygon',
-    'symbol': {
-        'lineColor': '#000000',
-        'lineWidth': 2,
-        'lineOpacity': 1,
-        'lineDasharray': '',
-        'polygonFill': '#ffffff',
-        'polygonOpacity': 0.5
-    }
-};
+  mode: 'Polygon',
+  symbol: {
+    lineColor: '#000000',
+    lineWidth: 2,
+    lineOpacity: 1,
+    lineDasharray: '',
+    polygonFill: '#ffffff',
+    polygonOpacity: 0.5
+  }
+}
 
 /**
  * A map tool to help measure area on the map
@@ -48,8 +48,7 @@ const options = {
  *  }).addTo(map);
  */
 class AreaTool extends DistanceTool {
-
-    /**
+  /**
      * @param {options} [options=null] - construct options
      * @param {String} [options.language=zh-CN]         - language of the distance tool, zh-CN or en-US
      * @param {Boolean} [options.metric=true]           - display result in metric system
@@ -58,72 +57,72 @@ class AreaTool extends DistanceTool {
      * @param {Object}  [options.vertexSymbol=null]     - symbol of the vertice
      * @param {Object}  [options.labelOptions=null]     - construct options of the vertice labels.
      */
-    constructor(options) {
-        super(options);
-        this.on('enable', this._afterEnable, this)
-            .on('disable', this._afterDisable, this);
-        this._measureLayers = [];
-    }
+  constructor (options) {
+    super(options)
+    this.on('enable', this._afterEnable, this)
+      .on('disable', this._afterDisable, this)
+    this._measureLayers = []
+  }
 
-    _measure(toMeasure) {
-        const map = this.getMap();
-        let area;
-        if (toMeasure instanceof Geometry) {
-            area = map.computeGeometryArea(toMeasure);
-        } else if (Array.isArray(toMeasure)) {
-            area = map.getProjection().measureArea(toMeasure);
-        }
-        this._lastMeasure = area;
-        let units;
-        if (this.options['language'] === 'zh-CN') {
-            units = [' 平方米', ' 平方公里', ' 平方英尺', ' 平方英里'];
-        } else {
-            units = [' sq.m', ' sq.km', ' sq.ft', ' sq.mi'];
-        }
-        let content = '';
-        if (this.options['metric']) {
-            content += area < 1E6 ? area.toFixed(0) + units[0] : (area / 1E6).toFixed(2) + units[1];
-        }
-        if (this.options['imperial']) {
-            area *= 3.2808399;
-            if (content.length > 0) {
-                content += '\n';
-            }
-            const sqmi = 5280 * 5280;
-            content += area < sqmi ? area.toFixed(0) + units[2] : (area / sqmi).toFixed(2) + units[3];
-        }
-        return content;
+  _measure (toMeasure) {
+    const map = this.getMap()
+    let area
+    if (toMeasure instanceof Geometry) {
+      area = map.computeGeometryArea(toMeasure)
+    } else if (Array.isArray(toMeasure)) {
+      area = map.getProjection().measureArea(toMeasure)
     }
-
-    _msGetCoordsToMeasure(param) {
-        return param['geometry'].getShell().concat([param['coordinate']]);
+    this._lastMeasure = area
+    let units
+    if (this.options.language === 'zh-CN') {
+      units = [' 平方米', ' 平方公里', ' 平方英尺', ' 平方英里']
+    } else {
+      units = [' sq.m', ' sq.km', ' sq.ft', ' sq.mi']
     }
-
-    _msOnDrawVertex(param) {
-        const vertexMarker = new Marker(param['coordinate'], {
-            'symbol': this.options['vertexSymbol']
-        }).addTo(this._measureMarkerLayer);
-        this._measure(param['geometry']);
-        this._lastVertex = vertexMarker;
+    let content = ''
+    if (this.options.metric) {
+      content += area < 1E6 ? area.toFixed(0) + units[0] : (area / 1E6).toFixed(2) + units[1]
     }
-
-    _msOnDrawEnd(param) {
-        this._clearTailMarker();
-
-        const ms = this._measure(param['geometry']);
-        const endLabel = new Label(ms, param['coordinate'], this.options['labelOptions'])
-            .addTo(this._measureMarkerLayer);
-        let size = endLabel.getSize();
-        if (!size) {
-            size = new Size(10, 10);
-        }
-        this._addClearMarker(param['coordinate'], size['width']);
-        const geo = param['geometry'].copy();
-        geo.addTo(this._measureLineLayer);
-        this._lastMeasure = geo.getArea();
+    if (this.options.imperial) {
+      area *= 3.2808399
+      if (content.length > 0) {
+        content += '\n'
+      }
+      const sqmi = 5280 * 5280
+      content += area < sqmi ? area.toFixed(0) + units[2] : (area / sqmi).toFixed(2) + units[3]
     }
+    return content
+  }
+
+  _msGetCoordsToMeasure (param) {
+    return param.geometry.getShell().concat([param.coordinate])
+  }
+
+  _msOnDrawVertex (param) {
+    const vertexMarker = new Marker(param.coordinate, {
+      symbol: this.options.vertexSymbol
+    }).addTo(this._measureMarkerLayer)
+    this._measure(param.geometry)
+    this._lastVertex = vertexMarker
+  }
+
+  _msOnDrawEnd (param) {
+    this._clearTailMarker()
+
+    const ms = this._measure(param.geometry)
+    const endLabel = new Label(ms, param.coordinate, this.options.labelOptions)
+      .addTo(this._measureMarkerLayer)
+    let size = endLabel.getSize()
+    if (!size) {
+      size = new Size(10, 10)
+    }
+    this._addClearMarker(param.coordinate, size.width)
+    const geo = param.geometry.copy()
+    geo.addTo(this._measureLineLayer)
+    this._lastMeasure = geo.getArea()
+  }
 }
 
-AreaTool.mergeOptions(options);
+AreaTool.mergeOptions(options)
 
-export default AreaTool;
+export default AreaTool

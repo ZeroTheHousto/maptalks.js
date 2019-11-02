@@ -1,7 +1,7 @@
-import { extend } from '../core/util';
-import { getAlignPoint, escapeSpecialChars } from '../core/util/strings';
-import Size from '../geo/Size';
-import TextMarker from './TextMarker';
+import { extend } from '../core/util'
+import { getAlignPoint, escapeSpecialChars } from '../core/util/strings'
+import Size from '../geo/Size'
+import TextMarker from './TextMarker'
 
 /**
  * @property {Object} [options=null]                   - textbox's options, also including options of [Marker]{@link Marker#options}
@@ -16,16 +16,16 @@ import TextMarker from './TextMarker';
  * @instance
  */
 const options = {
-    'boxStyle' : null, /*{
+  boxStyle: null, /* {
         'padding' : [12, 8],
         'verticalAlignment' : 'middle',
         'horizontalAlignment' : 'middle',
         'minWidth' : 0,
         'minHeight' : 0,
         'symbol' : null
-    }*/
-    textSymbol : null
-};
+    } */
+  textSymbol: null
+}
 
 /**
  * @classdesc
@@ -65,163 +65,161 @@ const options = {
     });
  */
 class Label extends TextMarker {
-
-    /**
+  /**
      * @param {String} content                 - Label's text content
      * @param {Coordinate} coordinates         - coordinates
      * @param {Object} [options=null]          - construct options defined in [Label]{@link Label#options}
      */
-    constructor(content, coordinates, options = {}) {
-        super(coordinates, options);
-        if (options.textSymbol) {
-            this.setTextSymbol(options.textSymbol);
-        }
-        if (options.boxStyle) {
-            this.setBoxStyle(options.boxStyle);
-        }
-        this._content = escapeSpecialChars(content);
-        this._refresh();
+  constructor (content, coordinates, options = {}) {
+    super(coordinates, options)
+    if (options.textSymbol) {
+      this.setTextSymbol(options.textSymbol)
     }
+    if (options.boxStyle) {
+      this.setBoxStyle(options.boxStyle)
+    }
+    this._content = escapeSpecialChars(content)
+    this._refresh()
+  }
 
-    /**
+  /**
      * Get label's box style
      * @return {Object}
      */
-    getBoxStyle() {
-        if (!this.options.boxStyle) {
-            return null;
-        }
-        return extend({}, this.options.boxStyle);
+  getBoxStyle () {
+    if (!this.options.boxStyle) {
+      return null
     }
+    return extend({}, this.options.boxStyle)
+  }
 
-    /**
+  /**
      * Set a new box style to the label
      * @param {Object}
      * @returns {Label} this
      */
-    setBoxStyle(style) {
-        this.options.boxStyle = style ? extend({}, style) : style;
-        this._refresh();
-        return this;
-    }
+  setBoxStyle (style) {
+    this.options.boxStyle = style ? extend({}, style) : style
+    this._refresh()
+    return this
+  }
 
-    /**
+  /**
      * Get label's text symbol
      * @return {Object}
      */
-    getTextSymbol() {
-        return extend({}, this._getDefaultTextSymbol(), this.options.textSymbol);
-    }
+  getTextSymbol () {
+    return extend({}, this._getDefaultTextSymbol(), this.options.textSymbol)
+  }
 
-    /**
+  /**
      * Set a new text symbol to the label
      * @param {Object} symbol
      * @returns {Label} this
      */
-    setTextSymbol(symbol) {
-        this.options.textSymbol = symbol ? extend({}, symbol) : symbol;
-        this._refresh();
-        return this;
+  setTextSymbol (symbol) {
+    this.options.textSymbol = symbol ? extend({}, symbol) : symbol
+    this._refresh()
+    return this
+  }
+
+  static fromJSON (json) {
+    const feature = json.feature
+    const label = new Label(json.content, feature.geometry.coordinates, json.options)
+    label.setProperties(feature.properties)
+    label.setId(feature.id)
+    if (json.symbol) {
+      label.setSymbol(json.symbol)
     }
+    return label
+  }
 
-    static fromJSON(json) {
-        const feature = json['feature'];
-        const label = new Label(json['content'], feature['geometry']['coordinates'], json['options']);
-        label.setProperties(feature['properties']);
-        label.setId(feature['id']);
-        if (json['symbol']) {
-            label.setSymbol(json['symbol']);
-        }
-        return label;
+  _canEdit () {
+    return false
+  }
+
+  _toJSON (options) {
+    return {
+      feature: this.toGeoJSON(options),
+      subType: 'Label',
+      content: this._content
     }
+  }
 
-    _canEdit() {
-        return false;
+  _refresh () {
+    const symbol = extend({},
+      this.getTextSymbol(),
+      {
+        textName: this._content
+      })
+
+    const boxStyle = this.getBoxStyle()
+    if (boxStyle) {
+      extend(symbol, boxStyle.symbol)
+      const sizes = this._getBoxSize(symbol)
+      const textSize = sizes[1]
+      const padding = boxStyle.padding || this._getDefaultPadding()
+      const boxSize = sizes[0]
+      // if no boxSize then use text's size in default
+      symbol.markerWidth = boxSize.width
+      symbol.markerHeight = boxSize.height
+
+      const dx = symbol.textDx || 0
+      const dy = symbol.textDy || 0
+      const textAlignPoint = getAlignPoint(textSize, symbol.textHorizontalAlignment, symbol.textVerticalAlignment)
+        ._add(dx, dy)
+
+      const hAlign = boxStyle.horizontalAlignment || 'middle'
+      symbol.markerDx = textAlignPoint.x
+      if (hAlign === 'left') {
+        symbol.markerDx += symbol.markerWidth / 2 - padding[0]
+      } else if (hAlign === 'right') {
+        symbol.markerDx -= symbol.markerWidth / 2 - textSize.width - padding[0]
+      } else {
+        symbol.markerDx += textSize.width / 2
+      }
+
+      const vAlign = boxStyle.verticalAlignment || 'middle'
+      symbol.markerDy = textAlignPoint.y
+      if (vAlign === 'top') {
+        symbol.markerDy += symbol.markerHeight / 2 - padding[1]
+      } else if (vAlign === 'bottom') {
+        symbol.markerDy -= symbol.markerHeight / 2 - textSize.height - padding[1]
+      } else {
+        symbol.markerDy += textSize.height / 2
+      }
     }
+    this._refreshing = true
+    this.updateSymbol(symbol)
+    delete this._refreshing
+  }
 
-    _toJSON(options) {
-        return {
-            'feature': this.toGeoJSON(options),
-            'subType': 'Label',
-            'content': this._content
-        };
+  _getBoxSize (symbol) {
+    if (!symbol.markerType) {
+      symbol.markerType = 'square'
     }
-
-    _refresh() {
-        const symbol = extend({},
-            this.getTextSymbol(),
-            {
-                'textName' : this._content
-            });
-
-        const boxStyle = this.getBoxStyle();
-        if (boxStyle) {
-            extend(symbol, boxStyle.symbol);
-            const sizes = this._getBoxSize(symbol),
-                textSize = sizes[1],
-                padding = boxStyle['padding'] || this._getDefaultPadding();
-            const boxSize = sizes[0];
-            //if no boxSize then use text's size in default
-            symbol['markerWidth'] = boxSize['width'];
-            symbol['markerHeight'] = boxSize['height'];
-
-            const dx = symbol['textDx'] || 0,
-                dy = symbol['textDy'] || 0,
-                textAlignPoint = getAlignPoint(textSize, symbol['textHorizontalAlignment'], symbol['textVerticalAlignment'])
-                    ._add(dx, dy);
-
-            const hAlign = boxStyle['horizontalAlignment'] || 'middle';
-            symbol['markerDx'] = textAlignPoint.x;
-            if (hAlign === 'left') {
-                symbol['markerDx'] += symbol['markerWidth'] / 2 - padding[0];
-            } else if (hAlign === 'right') {
-                symbol['markerDx'] -= symbol['markerWidth'] / 2 - textSize['width'] - padding[0];
-            } else {
-                symbol['markerDx'] += textSize['width'] / 2;
-            }
-
-            const vAlign = boxStyle['verticalAlignment'] || 'middle';
-            symbol['markerDy'] = textAlignPoint.y;
-            if (vAlign === 'top') {
-                symbol['markerDy'] += symbol['markerHeight'] / 2 - padding[1];
-            } else if (vAlign === 'bottom') {
-                symbol['markerDy'] -= symbol['markerHeight'] / 2 - textSize['height'] - padding[1];
-            } else {
-                symbol['markerDy'] += textSize['height'] / 2;
-            }
-        }
-        this._refreshing = true;
-        this.updateSymbol(symbol);
-        delete this._refreshing;
+    const boxStyle = this.getBoxStyle()
+    const size = this._getTextSize(symbol)
+    let width, height
+    const padding = boxStyle.padding || this._getDefaultPadding()
+    width = size.width + padding[0] * 2
+    height = size.height + padding[1] * 2
+    if (boxStyle.minWidth) {
+      if (!width || width < boxStyle.minWidth) {
+        width = boxStyle.minWidth
+      }
     }
-
-    _getBoxSize(symbol) {
-        if (!symbol['markerType']) {
-            symbol['markerType'] = 'square';
-        }
-        const boxStyle = this.getBoxStyle();
-        const size = this._getTextSize(symbol);
-        let width, height;
-        const padding = boxStyle['padding'] || this._getDefaultPadding();
-        width = size['width'] + padding[0] * 2;
-        height = size['height'] + padding[1] * 2;
-        if (boxStyle['minWidth']) {
-            if (!width || width < boxStyle['minWidth']) {
-                width = boxStyle['minWidth'];
-            }
-        }
-        if (boxStyle['minHeight']) {
-            if (!height || height < boxStyle['minHeight']) {
-                height = boxStyle['minHeight'];
-            }
-        }
-        return [new Size(width, height), size];
+    if (boxStyle.minHeight) {
+      if (!height || height < boxStyle.minHeight) {
+        height = boxStyle.minHeight
+      }
     }
-
+    return [new Size(width, height), size]
+  }
 }
 
-Label.mergeOptions(options);
+Label.mergeOptions(options)
 
-Label.registerJSONType('Label');
+Label.registerJSONType('Label')
 
-export default Label;
+export default Label

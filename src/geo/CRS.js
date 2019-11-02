@@ -4,17 +4,16 @@
  * @category geo
  */
 class CRS {
-
-    /**
+  /**
      * @param {String} type          - type of the CRS
      * @param {Object} properties    - CRS's properties
      */
-    constructor(type, properties) {
-        this.type = type;
-        this.properties = properties;
-    }
+  constructor (type, properties) {
+    this.type = type
+    this.properties = properties
+  }
 
-    /**
+  /**
      * Create a [proj4]{@link https://github.com/OSGeo/proj.4} style CRS used by maptalks <br>
      * @example
      * {
@@ -27,19 +26,19 @@ class CRS {
      * @param  {String} proj - a proj4 projection string.
      * @return {CRS}
      */
-    static createProj4(proj) {
-        return new CRS('proj4', {
-            'proj': proj
-        });
-    }
+  static createProj4 (proj) {
+    return new CRS('proj4', {
+      proj: proj
+    })
+  }
 
-    static fromProjectionCode(code) {
-        if (!code) {
-            return null;
-        }
-        code = code.toUpperCase().replace(':', '');
-        return CRS[code] || null;
+  static fromProjectionCode (code) {
+    if (!code) {
+      return null
     }
+    code = code.toUpperCase().replace(':', '')
+    return CRS[code] || null
+  }
 }
 
 // some common CRS definitions
@@ -49,21 +48,21 @@ class CRS {
  * @type {CRS}
  * @constant
  */
-CRS.WGS84 = CRS.createProj4('+proj=longlat +datum=WGS84 +no_defs');
+CRS.WGS84 = CRS.createProj4('+proj=longlat +datum=WGS84 +no_defs')
 
 /**
  * Alias for CRS.WGS84
  * @type {CRS}
  * @constant
  */
-CRS.EPSG4326 = CRS.WGS84;
+CRS.EPSG4326 = CRS.WGS84
 
 /**
  * Projected Coordinate System used by google maps that has the following alias: 'EPSG:3785', 'GOOGLE', 'EPSG:900913'
  * @type {CRS}
  * @constant
  */
-CRS.EPSG3857 = CRS.createProj4('+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs');
+CRS.EPSG3857 = CRS.createProj4('+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs')
 
 /**
  * A CRS represents a simple Cartesian coordinate system. <br>
@@ -71,7 +70,7 @@ CRS.EPSG3857 = CRS.createProj4('+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lo
  * @type {CRS}
  * @constant
  */
-CRS.IDENTITY = CRS.createProj4('+proj=identity +no_defs');
+CRS.IDENTITY = CRS.createProj4('+proj=identity +no_defs')
 
 /**
  * Official coordinate system in China (aka EPSG:4490), in most cases, it can be considered the same with WGS84.
@@ -79,21 +78,21 @@ CRS.IDENTITY = CRS.createProj4('+proj=identity +no_defs');
  * @see  {@link http://spatialreference.org/ref/sr-org/7408/}
  * @constant
  */
-CRS.CGCS2000 = CRS.createProj4('+proj=longlat +datum=CGCS2000');
+CRS.CGCS2000 = CRS.createProj4('+proj=longlat +datum=CGCS2000')
 
 /**
  * Alias for CRS.CGCS2000
  * @type {CRS}
  * @constant
  */
-CRS.EPSG4490 = CRS.CGCS2000;
+CRS.EPSG4490 = CRS.CGCS2000
 
 /**
  * Projection used by [Baidu Map]{@link http://map.baidu.com}, a popular web map service in China.
  * @type {CRS}
  * @constant
  */
-CRS.BD09LL = CRS.createProj4('+proj=longlat +datum=BD09');
+CRS.BD09LL = CRS.createProj4('+proj=longlat +datum=BD09')
 
 /**
  * A encrypted CRS usded in the most online map services in China..
@@ -101,6 +100,6 @@ CRS.BD09LL = CRS.createProj4('+proj=longlat +datum=BD09');
  * @see {@link https://en.wikipedia.org/wiki/Restrictions_on_geographic_data_in_China}
  * @constant
  */
-CRS.GCJ02 = CRS.createProj4('+proj=longlat +datum=GCJ02');
+CRS.GCJ02 = CRS.createProj4('+proj=longlat +datum=GCJ02')
 
-export default CRS;
+export default CRS

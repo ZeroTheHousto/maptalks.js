@@ -1,8 +1,8 @@
-import { now } from '../../core/util';
-import { on, off, getEventContainerPoint, preventDefault, stopPropagation } from '../../core/util/dom';
-import Handler from '../../handler/Handler';
-import Geometry from '../../geometry/Geometry';
-import Map from '../Map';
+import { now } from '../../core/util'
+import { on, off, getEventContainerPoint, preventDefault, stopPropagation } from '../../core/util/dom'
+import Handler from '../../handler/Handler'
+import Geometry from '../../geometry/Geometry'
+import Map from '../Map'
 
 const EVENTS =
     /**
@@ -112,7 +112,7 @@ const EVENTS =
      * @property {Point} viewPoint       - view point of the event
      * @property {Event} domEvent                 - dom event
      */
-    'touchend';
+    'touchend'
     /**
      * mouseenter event for geometry
      * @event Geometry#mouseenter
@@ -124,7 +124,7 @@ const EVENTS =
      * @property {Point} viewPoint       - view point of the event
      * @property {Event} domEvent                 - dom event
      */
-    /**
+/**
      * mouseover event for geometry
      * @event Geometry#mouseover
      * @type {Object}
@@ -135,7 +135,7 @@ const EVENTS =
      * @property {Point} viewPoint       - view point of the event
      * @property {Event} domEvent                 - dom event
      */
-    /**
+/**
      * mouseout event for geometry
      * @event Geometry#mouseout
      * @type {Object}
@@ -148,172 +148,168 @@ const EVENTS =
      */
 
 class MapGeometryEventsHandler extends Handler {
+  addHooks () {
+    const map = this.target
+    const dom = map._panels.allLayers || map._containerDOM
+    on(dom, EVENTS, this._identifyGeometryEvents, this)
+  }
 
-    addHooks() {
-        const map = this.target;
-        const dom = map._panels.allLayers || map._containerDOM;
-        on(dom, EVENTS, this._identifyGeometryEvents, this);
+  removeHooks () {
+    const map = this.target
+    const dom = map._panels.allLayers || map._containerDOM
+    off(dom, EVENTS, this._identifyGeometryEvents, this)
+  }
+
+  _identifyGeometryEvents (domEvent, type) {
+    const map = this.target
+    if (map.isInteracting() || map._ignoreEvent(domEvent)) {
+      return
+    }
+    const layers = map._getLayers(layer => {
+      if (layer.identify && layer.options.geometryEvents) {
+        return true
+      }
+      return false
+    })
+    if (!layers.length) {
+      return
+    }
+    let oneMoreEvent = null
+    const eventType = type || domEvent.type
+    // ignore click lasted for more than 300ms.
+    if (eventType === 'mousedown' || (eventType === 'touchstart' && domEvent.touches.length === 1)) {
+      this._mouseDownTime = now()
+    } else if ((eventType === 'click' || eventType === 'touchend') && this._mouseDownTime) {
+      const downTime = this._mouseDownTime
+      delete this._mouseDownTime
+      const time = now()
+      if (time - downTime > 300) {
+        if (eventType === 'click') {
+          return
+        }
+      } else if (eventType === 'touchend') {
+        oneMoreEvent = 'click'
+      }
     }
 
-    removeHooks() {
-        const map = this.target;
-        const dom = map._panels.allLayers || map._containerDOM;
-        off(dom, EVENTS, this._identifyGeometryEvents, this);
+    const actual = domEvent.touches && domEvent.touches.length > 0
+      ? domEvent.touches[0] : domEvent.changedTouches && domEvent.changedTouches.length > 0
+        ? domEvent.changedTouches[0] : domEvent
+    if (!actual) {
+      return
+    }
+    const containerPoint = getEventContainerPoint(actual, map._containerDOM)
+    const coordinate = map.containerPointToCoordinate(containerPoint)
+    if (eventType === 'touchstart') {
+      preventDefault(domEvent)
+    }
+    let geometryCursorStyle = null
+    const identifyOptions = {
+      includeInternals: true,
+      // return only one geometry on top,
+      filter: geometry => {
+        if (!(geometry instanceof Geometry)) {
+          return false
+        }
+        const eventToFire = geometry._getEventTypeToFire(domEvent)
+        if (eventType === 'mousemove') {
+          if (!geometryCursorStyle && geometry.options.cursor) {
+            geometryCursorStyle = geometry.options.cursor
+          }
+          if (!geometry.listens('mousemove') && !geometry.listens('mouseover') && !geometry.listens('mouseenter')) {
+            return false
+          }
+        } else if (!geometry.listens(eventToFire) && !geometry.listens(oneMoreEvent)) {
+          return false
+        }
+
+        return true
+      },
+      count: 1,
+      coordinate: coordinate,
+      onlyVisible: map.options.onlyVisibleGeometryEvents,
+      layers: layers
+    }
+    const callback = fireGeometryEvent.bind(this)
+
+    if (eventType === 'mousemove' || eventType === 'touchmove') {
+      this._queryIdentifyTimeout = map.getRenderer().callInNextFrame(() => {
+        if (map.isInteracting()) {
+          return
+        }
+        map.identify(identifyOptions, callback)
+      })
+    } else {
+      map.identify(identifyOptions, callback)
     }
 
-    _identifyGeometryEvents(domEvent, type) {
-        const map = this.target;
-        if (map.isInteracting() || map._ignoreEvent(domEvent)) {
-            return;
-        }
-        const layers = map._getLayers(layer => {
-            if (layer.identify && layer.options['geometryEvents']) {
-                return true;
+    function fireGeometryEvent (geometries) {
+      let propagation = true
+      if (eventType === 'mousemove') {
+        const geoMap = {}
+        if (geometries.length > 0) {
+          for (let i = geometries.length - 1; i >= 0; i--) {
+            const geo = geometries[i]
+            if (!(geo instanceof Geometry)) {
+              continue
             }
-            return false;
-        });
-        if (!layers.length) {
-            return;
-        }
-        let oneMoreEvent = null;
-        const eventType = type || domEvent.type;
-        // ignore click lasted for more than 300ms.
-        if (eventType === 'mousedown' || (eventType === 'touchstart' && domEvent.touches.length === 1)) {
-            this._mouseDownTime = now();
-        } else if ((eventType === 'click' || eventType === 'touchend') && this._mouseDownTime) {
-            const downTime = this._mouseDownTime;
-            delete this._mouseDownTime;
-            const time = now();
-            if (time - downTime > 300) {
-                if (eventType === 'click') {
-                    return;
-                }
-            } else if (eventType === 'touchend') {
-                oneMoreEvent = 'click';
+            const iid = geo._getInternalId()
+            geoMap[iid] = geo
+            geo._onEvent(domEvent)
+            if (!this._prevOverGeos || !this._prevOverGeos.geomap[iid]) {
+              geo._onEvent(domEvent, 'mouseenter')
             }
+            propagation = geo._onEvent(domEvent, 'mouseover')
+          }
         }
 
+        map._setPriorityCursor(geometryCursorStyle)
 
-        const actual = domEvent.touches && domEvent.touches.length > 0 ?
-            domEvent.touches[0] : domEvent.changedTouches && domEvent.changedTouches.length > 0 ?
-                domEvent.changedTouches[0] : domEvent;
-        if (!actual) {
-            return;
+        const oldTargets = this._prevOverGeos && this._prevOverGeos.geos
+        this._prevOverGeos = {
+          geos: geometries,
+          geomap: geoMap
         }
-        const containerPoint = getEventContainerPoint(actual, map._containerDOM),
-            coordinate = map.containerPointToCoordinate(containerPoint);
-        if (eventType === 'touchstart') {
-            preventDefault(domEvent);
-        }
-        let geometryCursorStyle = null;
-        const identifyOptions = {
-            'includeInternals': true,
-            //return only one geometry on top,
-            'filter': geometry => {
-                if (!(geometry instanceof Geometry)) {
-                    return false;
-                }
-                const eventToFire = geometry._getEventTypeToFire(domEvent);
-                if (eventType === 'mousemove') {
-                    if (!geometryCursorStyle && geometry.options['cursor']) {
-                        geometryCursorStyle = geometry.options['cursor'];
-                    }
-                    if (!geometry.listens('mousemove') && !geometry.listens('mouseover') && !geometry.listens('mouseenter')) {
-                        return false;
-                    }
-                } else if (!geometry.listens(eventToFire) && !geometry.listens(oneMoreEvent)) {
-                    return false;
-                }
-
-                return true;
-            },
-            'count': 1,
-            'coordinate': coordinate,
-            'onlyVisible' : map.options['onlyVisibleGeometryEvents'],
-            'layers': layers
-        };
-        const callback = fireGeometryEvent.bind(this);
-
-        if (eventType === 'mousemove' || eventType === 'touchmove') {
-            this._queryIdentifyTimeout = map.getRenderer().callInNextFrame(() => {
-                if (map.isInteracting()) {
-                    return;
-                }
-                map.identify(identifyOptions, callback);
-            });
-        } else {
-            map.identify(identifyOptions, callback);
-        }
-
-        function fireGeometryEvent(geometries) {
-            let propagation = true;
-            if (eventType === 'mousemove') {
-                const geoMap = {};
-                if (geometries.length > 0) {
-                    for (let i = geometries.length - 1; i >= 0; i--) {
-                        const geo = geometries[i];
-                        if (!(geo instanceof Geometry)) {
-                            continue;
-                        }
-                        const iid = geo._getInternalId();
-                        geoMap[iid] = geo;
-                        geo._onEvent(domEvent);
-                        if (!this._prevOverGeos || !this._prevOverGeos.geomap[iid]) {
-                            geo._onEvent(domEvent, 'mouseenter');
-                        }
-                        propagation = geo._onEvent(domEvent, 'mouseover');
-                    }
-                }
-
-                map._setPriorityCursor(geometryCursorStyle);
-
-                const oldTargets = this._prevOverGeos && this._prevOverGeos.geos;
-                this._prevOverGeos = {
-                    'geos' : geometries,
-                    'geomap' : geoMap
-                };
-                if (oldTargets && oldTargets.length > 0) {
-                    for (let i = oldTargets.length - 1; i >= 0; i--) {
-                        const oldTarget = oldTargets[i];
-                        if (!(oldTarget instanceof Geometry)) {
-                            continue;
-                        }
-                        const oldTargetId = oldTargets[i]._getInternalId();
-                        /**
+        if (oldTargets && oldTargets.length > 0) {
+          for (let i = oldTargets.length - 1; i >= 0; i--) {
+            const oldTarget = oldTargets[i]
+            if (!(oldTarget instanceof Geometry)) {
+              continue
+            }
+            const oldTargetId = oldTargets[i]._getInternalId()
+            /**
                          * 鼠标经过的新位置中不包含老的目标geometry
                          */
-                        if (!geoMap[oldTargetId]) {
-                            propagation = oldTarget._onEvent(domEvent, 'mouseout');
-                        }
-                    }
-                }
-
-            } else {
-                if (!geometries || !geometries.length) { return; }
-                for (let i = geometries.length - 1; i >= 0; i--) {
-                    if (!(geometries[i] instanceof Geometry)) {
-                        continue;
-                    }
-                    propagation = geometries[i]._onEvent(domEvent);
-                    if (oneMoreEvent) {
-                        geometries[i]._onEvent(domEvent, oneMoreEvent);
-                    }
-                    break;
-                }
+            if (!geoMap[oldTargetId]) {
+              propagation = oldTarget._onEvent(domEvent, 'mouseout')
             }
-            if (propagation === false) {
-                stopPropagation(domEvent);
-            }
+          }
         }
-
+      } else {
+        if (!geometries || !geometries.length) { return }
+        for (let i = geometries.length - 1; i >= 0; i--) {
+          if (!(geometries[i] instanceof Geometry)) {
+            continue
+          }
+          propagation = geometries[i]._onEvent(domEvent)
+          if (oneMoreEvent) {
+            geometries[i]._onEvent(domEvent, oneMoreEvent)
+          }
+          break
+        }
+      }
+      if (propagation === false) {
+        stopPropagation(domEvent)
+      }
     }
+  }
 }
 
 Map.mergeOptions({
-    'geometryEvents': true,
-    'onlyVisibleGeometryEvents' : true
-});
+  geometryEvents: true,
+  onlyVisibleGeometryEvents: true
+})
 
-Map.addOnLoadHook('addHandler', 'geometryEvents', MapGeometryEventsHandler);
+Map.addOnLoadHook('addHandler', 'geometryEvents', MapGeometryEventsHandler)
 
-export default MapGeometryEventsHandler;
+export default MapGeometryEventsHandler

@@ -1,7 +1,7 @@
-import { extend, isNil, isString } from '../core/util';
-import { createEl } from '../core/util/dom';
-import DragHandler from '../handler/Drag';
-import Control from './Control';
+import { extend, isNil, isString } from '../core/util'
+import { createEl } from '../core/util/dom'
+import DragHandler from '../handler/Drag'
+import Control from './Control'
 
 /**
  * @property {Object} options - options
@@ -14,14 +14,12 @@ import Control from './Control';
  * @instance
  */
 const options = {
-    'position': 'top-right',
-    'draggable': true,
-    'custom': false,
-    'content': '',
-    'closeButton': true
-};
-
-
+  position: 'top-right',
+  draggable: true,
+  custom: false,
+  content: '',
+  closeButton: true
+}
 
 /**
  * @classdesc
@@ -39,75 +37,74 @@ const options = {
  * }).addTo(map);
  */
 class Panel extends Control {
-
-    /**
+  /**
      * method to build DOM of the control
      * @param  {Map} map map to build on
      * @return {HTMLDOMElement}
      */
-    buildOn() {
-        let dom;
-        if (this.options['custom']) {
-            if (isString(this.options['content'])) {
-                dom = createEl('div');
-                dom.innerHTML = this.options['content'];
-            } else {
-                dom = this.options['content'];
-            }
-        } else {
-            dom = createEl('div', 'maptalks-panel');
-            if (this.options['closeButton']) {
-                const closeButton = createEl('a', 'maptalks-close');
-                closeButton.href = 'javascript:;';
-                closeButton.onclick = function () {
-                    dom.style.display = 'none';
-                };
-                dom.appendChild(closeButton);
-            }
-
-            const panelContent = createEl('div', 'maptalks-panel-content');
-            panelContent.innerHTML = this.options['content'];
-            dom.appendChild(panelContent);
+  buildOn () {
+    let dom
+    if (this.options.custom) {
+      if (isString(this.options.content)) {
+        dom = createEl('div')
+        dom.innerHTML = this.options.content
+      } else {
+        dom = this.options.content
+      }
+    } else {
+      dom = createEl('div', 'maptalks-panel')
+      if (this.options.closeButton) {
+        const closeButton = createEl('a', 'maptalks-close')
+        closeButton.href = 'javascript:;'
+        closeButton.onclick = function () {
+          dom.style.display = 'none'
         }
+        dom.appendChild(closeButton)
+      }
 
-        this.draggable = new DragHandler(dom, {
-            'cancelOn': this._cancelOn.bind(this),
-            'ignoreMouseleave' : true
-        });
-
-        this.draggable.on('dragstart', this._onDragStart, this)
-            .on('dragging', this._onDragging, this)
-            .on('dragend', this._onDragEnd, this);
-
-        if (this.options['draggable']) {
-            this.draggable.enable();
-        }
-
-        return dom;
+      const panelContent = createEl('div', 'maptalks-panel-content')
+      panelContent.innerHTML = this.options.content
+      dom.appendChild(panelContent)
     }
 
-    /**
+    this.draggable = new DragHandler(dom, {
+      cancelOn: this._cancelOn.bind(this),
+      ignoreMouseleave: true
+    })
+
+    this.draggable.on('dragstart', this._onDragStart, this)
+      .on('dragging', this._onDragging, this)
+      .on('dragend', this._onDragEnd, this)
+
+    if (this.options.draggable) {
+      this.draggable.enable()
+    }
+
+    return dom
+  }
+
+  /**
      * update control container
      * @return {control.Panel} this
      */
-    update() {
-        if (this.draggable) {
-            this.draggable.disable();
-            delete this.draggable;
-        }
-        return Control.prototype.update.call(this);
+  update () {
+    if (this.draggable) {
+      this.draggable.disable()
+      delete this.draggable
     }
+    return Control.prototype.update.call(this)
+  }
 
-    /**
+  /**
      * Set the content of the Panel.
      * @param {String|HTMLElement} content - content of the infowindow.
      * return {control.Panel} this
      * @fires Panel#contentchange
      */
-    setContent(content) {
-        const old = this.options['content'];
-        this.options['content'] = content;
-        /**
+  setContent (content) {
+    const old = this.options.content
+    this.options.content = content
+    /**
          * contentchange event.
          *
          * @event Panel#contentchange
@@ -117,41 +114,41 @@ class Panel extends Control {
          * @property {String|HTMLElement} old      - old content
          * @property {String|HTMLElement} new      - new content
          */
-        this.fire('contentchange', {
-            'old': old,
-            'new': content
-        });
-        if (this.isVisible()) {
-            this.update();
-        }
-        return this;
+    this.fire('contentchange', {
+      old: old,
+      new: content
+    })
+    if (this.isVisible()) {
+      this.update()
     }
+    return this
+  }
 
-    /**
+  /**
      * Get content of  the infowindow.
      * @return {String|HTMLElement} - content of the infowindow
      */
-    getContent() {
-        return this.options['content'];
-    }
+  getContent () {
+    return this.options.content
+  }
 
-    _cancelOn(domEvent) {
-        const target = domEvent.srcElement || domEvent.target,
-            tagName = target.tagName.toLowerCase();
-        if (tagName === 'button' ||
+  _cancelOn (domEvent) {
+    const target = domEvent.srcElement || domEvent.target
+    const tagName = target.tagName.toLowerCase()
+    if (tagName === 'button' ||
             tagName === 'input' ||
             tagName === 'select' ||
             tagName === 'option' ||
             tagName === 'textarea') {
-            return true;
-        }
-        return false;
+      return true
     }
+    return false
+  }
 
-    _onDragStart(param) {
-        this._startPos = param['mousePos'];
-        this._startPosition = extend({}, this.getPosition());
-        /**
+  _onDragStart (param) {
+    this._startPos = param.mousePos
+    this._startPosition = extend({}, this.getPosition())
+    /**
          * drag start event
          * @event control.Panel#dragstart
          * @type {Object}
@@ -160,29 +157,29 @@ class Panel extends Control {
          * @property {Point} mousePos     - mouse position
          * @property {Event} domEvent     - dom event
          */
-        this.fire('dragstart', param);
+    this.fire('dragstart', param)
+  }
+
+  _onDragging (param) {
+    const pos = param.mousePos
+    const offset = pos.sub(this._startPos)
+
+    const startPosition = this._startPosition
+    const position = this.getPosition()
+    if (!isNil(position.top)) {
+      position.top = parseInt(startPosition.top) + offset.y
     }
-
-    _onDragging(param) {
-        const pos = param['mousePos'];
-        const offset = pos.sub(this._startPos);
-
-        const startPosition = this._startPosition;
-        const position = this.getPosition();
-        if (!isNil(position['top'])) {
-            position['top'] = parseInt(startPosition['top']) + offset.y;
-        }
-        if (!isNil(position['bottom'])) {
-            position['bottom'] = parseInt(startPosition['bottom']) - offset.y;
-        }
-        if (!isNil(position['left'])) {
-            position['left'] = parseInt(startPosition['left']) + offset.x;
-        }
-        if (!isNil(position['right'])) {
-            position['right'] = parseInt(startPosition['right']) - offset.x;
-        }
-        this.setPosition(position);
-        /**
+    if (!isNil(position.bottom)) {
+      position.bottom = parseInt(startPosition.bottom) - offset.y
+    }
+    if (!isNil(position.left)) {
+      position.left = parseInt(startPosition.left) + offset.x
+    }
+    if (!isNil(position.right)) {
+      position.right = parseInt(startPosition.right) - offset.x
+    }
+    this.setPosition(position)
+    /**
          * dragging event
          * @event control.Panel#dragging
          * @type {Object}
@@ -191,13 +188,13 @@ class Panel extends Control {
          * @property {Point} mousePos     - mouse position
          * @property {Event} domEvent     - dom event
          */
-        this.fire('dragging', param);
-    }
+    this.fire('dragging', param)
+  }
 
-    _onDragEnd(param) {
-        delete this._startPos;
-        delete this._startPosition;
-        /**
+  _onDragEnd (param) {
+    delete this._startPos
+    delete this._startPosition
+    /**
          * drag end event
          * @event control.Panel#dragend
          * @type {Object}
@@ -206,43 +203,42 @@ class Panel extends Control {
          * @property {Point} mousePos     - mouse position
          * @property {Event} domEvent     - dom event
          */
-        this.fire('dragend', param);
-    }
+    this.fire('dragend', param)
+  }
 
-    /**
+  /**
      * Get the connect points of panel for connector lines.
      * @private
      */
-    _getConnectPoints() {
-        const map = this.getMap();
-        const containerPoint = this.getContainerPoint();
-        const dom = this.getDOM(),
-            width = parseInt(dom.clientWidth),
-            height = parseInt(dom.clientHeight);
-        const anchors = [
-            //top center
-            map.containerPointToCoordinate(
-                containerPoint.add(width / 2, 0)
-            ),
-            //middle right
-            map.containerPointToCoordinate(
-                containerPoint.add(width, height / 2)
-            ),
-            //bottom center
-            map.containerPointToCoordinate(
-                containerPoint.add(width / 2, height)
-            ),
-            //middle left
-            map.containerPointToCoordinate(
-                containerPoint.add(0, height / 2)
-            )
+  _getConnectPoints () {
+    const map = this.getMap()
+    const containerPoint = this.getContainerPoint()
+    const dom = this.getDOM()
+    const width = parseInt(dom.clientWidth)
+    const height = parseInt(dom.clientHeight)
+    const anchors = [
+      // top center
+      map.containerPointToCoordinate(
+        containerPoint.add(width / 2, 0)
+      ),
+      // middle right
+      map.containerPointToCoordinate(
+        containerPoint.add(width, height / 2)
+      ),
+      // bottom center
+      map.containerPointToCoordinate(
+        containerPoint.add(width / 2, height)
+      ),
+      // middle left
+      map.containerPointToCoordinate(
+        containerPoint.add(0, height / 2)
+      )
 
-        ];
-        return anchors;
-    }
-
+    ]
+    return anchors
+  }
 }
 
-Panel.mergeOptions(options);
+Panel.mergeOptions(options)
 
-export default Panel;
+export default Panel

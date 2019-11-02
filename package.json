@@ -44,8 +44,7 @@
     "@maptalks/feature-filter": "^1.0.0",
     "@maptalks/function-type": "^1.2.3",
     "rbush": "^2.0.2",
-    "simplify-js": "^1.2.1",
-    "zousan": "^2.5.1"
+    "simplify-js": "^1.2.1"
   },
   "devDependencies": {
     "@babel/core": "^7.6.4",

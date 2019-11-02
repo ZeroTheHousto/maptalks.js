@@ -1,6 +1,6 @@
-import { extend, isNil } from '../core/util';
-import { escapeSpecialChars } from '../core/util/strings';
-import TextMarker from './TextMarker';
+import { extend, isNil } from '../core/util'
+import { escapeSpecialChars } from '../core/util/strings'
+import TextMarker from './TextMarker'
 
 /**
  * @property {Object} [options=null]                   - textbox's options, also including options of [Marker]{@link Marker#options}
@@ -14,14 +14,14 @@ import TextMarker from './TextMarker';
  * @instance
  */
 const options = {
-    'textStyle' :  {
-        'wrap' : true,
-        'padding' : [12, 8],
-        'verticalAlignment' : 'middle',
-        'horizontalAlignment' : 'middle'
-    },
-    'boxSymbol' : null
-};
+  textStyle: {
+    wrap: true,
+    padding: [12, 8],
+    verticalAlignment: 'middle',
+    horizontalAlignment: 'middle'
+  },
+  boxSymbol: null
+}
 
 /**
  * @classdesc
@@ -60,182 +60,182 @@ const options = {
     });
  */
 class TextBox extends TextMarker {
-    /**
+  /**
      * @param {String} content                 - TextBox's text content
      * @param {Coordinate} coordinates         - coordinates
      * @param {Number} width                   - width in pixel
      * @param {Number} height                  - height in pixel
      * @param {Object} [options=null]          - construct options defined in [TextBox]{@link TextBox#options}
      */
-    constructor(content, coordinates, width, height, options = {}) {
-        super(coordinates, options);
-        this._content = escapeSpecialChars(content);
-        this._width = isNil(width) ? 100 : width;
-        this._height = isNil(height) ? 40 : height;
-        if (options.boxSymbol) {
-            this.setBoxSymbol(options.boxSymbol);
-        }
-        if (options.textStyle) {
-            this.setTextStyle(options.textStyle);
-        }
-        this._refresh();
+  constructor (content, coordinates, width, height, options = {}) {
+    super(coordinates, options)
+    this._content = escapeSpecialChars(content)
+    this._width = isNil(width) ? 100 : width
+    this._height = isNil(height) ? 40 : height
+    if (options.boxSymbol) {
+      this.setBoxSymbol(options.boxSymbol)
     }
+    if (options.textStyle) {
+      this.setTextStyle(options.textStyle)
+    }
+    this._refresh()
+  }
 
-    /**
+  /**
      * Get textbox's width
      * @return {Number}
      */
-    getWidth() {
-        return this._width;
-    }
+  getWidth () {
+    return this._width
+  }
 
-    /**
+  /**
      * Set new width to textbox
      * @param {Number} width
      * returns {TextBox} this
      */
-    setWidth(width) {
-        this._width = width;
-        this._refresh();
-        return this;
-    }
+  setWidth (width) {
+    this._width = width
+    this._refresh()
+    return this
+  }
 
-    /**
+  /**
      * Get textbox's height
      * @return {Number}
      */
-    getHeight() {
-        return this._height;
-    }
+  getHeight () {
+    return this._height
+  }
 
-    /**
+  /**
      * Set new height to textbox
      * @param {Number} height
      * returns {TextBox} this
      */
-    setHeight(height) {
-        this._height = height;
-        this._refresh();
-        return this;
-    }
+  setHeight (height) {
+    this._height = height
+    this._refresh()
+    return this
+  }
 
-    /**
+  /**
      * Get textbox's boxSymbol
      * @return {Object} boxsymbol
      */
-    getBoxSymbol() {
-        return extend({}, this.options.boxSymbol);
-    }
+  getBoxSymbol () {
+    return extend({}, this.options.boxSymbol)
+  }
 
-    /**
+  /**
      * Set a new box symbol to textbox
      * @param {Object} symbol
      * returns {TextBox} this
      */
-    setBoxSymbol(symbol) {
-        this.options.boxSymbol = symbol ? extend({}, symbol) : symbol;
-        if (this.getSymbol()) {
-            this._refresh();
-        }
-        return this;
+  setBoxSymbol (symbol) {
+    this.options.boxSymbol = symbol ? extend({}, symbol) : symbol
+    if (this.getSymbol()) {
+      this._refresh()
     }
+    return this
+  }
 
-    /**
+  /**
      * Get textbox's text style
      * @return {Object}
      */
-    getTextStyle() {
-        if (!this.options.textStyle) {
-            return null;
-        }
-        return extend({}, this.options.textStyle);
+  getTextStyle () {
+    if (!this.options.textStyle) {
+      return null
     }
+    return extend({}, this.options.textStyle)
+  }
 
-    /**
+  /**
      * Set a new text style to the textbox
      * @param {Object} style new text style
      * returns {TextBox} this
      */
-    setTextStyle(style) {
-        this.options.textStyle = style ? extend({}, style) : style;
-        if (this.getSymbol()) {
-            this._refresh();
-        }
-        return this;
+  setTextStyle (style) {
+    this.options.textStyle = style ? extend({}, style) : style
+    if (this.getSymbol()) {
+      this._refresh()
+    }
+    return this
+  }
+
+  static fromJSON (json) {
+    const feature = json.feature
+    const textBox = new TextBox(json.content, feature.geometry.coordinates, json.width, json.height, json.options)
+    textBox.setProperties(feature.properties)
+    textBox.setId(feature.id)
+    if (json.symbol) {
+      textBox.setSymbol(json.symbol)
+    }
+    return textBox
+  }
+
+  _toJSON (options) {
+    return {
+      feature: this.toGeoJSON(options),
+      width: this.getWidth(),
+      height: this.getHeight(),
+      subType: 'TextBox',
+      content: this._content
+    }
+  }
+
+  _refresh () {
+    const textStyle = this.getTextStyle() || {}
+    const padding = textStyle.padding || [12, 8]
+    const maxWidth = this._width - 2 * padding[0]
+    const maxHeight = this._height - 2 * padding[1]
+    const symbol = extend({},
+      textStyle.symbol || this._getDefaultTextSymbol(),
+      this.options.boxSymbol || this._getDefaultBoxSymbol(),
+      {
+        textName: this._content,
+        markerWidth: this._width,
+        markerHeight: this._height,
+        textHorizontalAlignment: 'middle',
+        textVerticalAlignment: 'middle',
+        textMaxWidth: maxWidth,
+        textMaxHeight: maxHeight
+      })
+
+    if (textStyle.wrap && !symbol.textWrapWidth) {
+      symbol.textWrapWidth = maxWidth
     }
 
-    static fromJSON(json) {
-        const feature = json['feature'];
-        const textBox = new TextBox(json['content'], feature['geometry']['coordinates'], json['width'], json['height'], json['options']);
-        textBox.setProperties(feature['properties']);
-        textBox.setId(feature['id']);
-        if (json['symbol']) {
-            textBox.setSymbol(json['symbol']);
-        }
-        return textBox;
+    const hAlign = textStyle.horizontalAlignment
+    symbol.textDx = symbol.markerDx || 0
+    const offsetX = symbol.markerWidth / 2 - padding[0]
+    if (hAlign === 'left') {
+      symbol.textHorizontalAlignment = 'right'
+      symbol.textDx = symbol.textDx - offsetX
+    } else if (hAlign === 'right') {
+      symbol.textHorizontalAlignment = 'left'
+      symbol.textDx = symbol.textDx + offsetX
     }
 
-    _toJSON(options) {
-        return {
-            'feature': this.toGeoJSON(options),
-            'width' : this.getWidth(),
-            'height' : this.getHeight(),
-            'subType': 'TextBox',
-            'content': this._content
-        };
+    const vAlign = textStyle.verticalAlignment
+    symbol.textDy = symbol.markerDy || 0
+    const offsetY = symbol.markerHeight / 2 - padding[1]
+    if (vAlign === 'top') {
+      symbol.textVerticalAlignment = 'bottom'
+      symbol.textDy -= offsetY
+    } else if (vAlign === 'bottom') {
+      symbol.textVerticalAlignment = 'top'
+      symbol.textDy += offsetY
     }
-
-    _refresh() {
-        const textStyle = this.getTextStyle() || {},
-            padding = textStyle['padding'] || [12, 8],
-            maxWidth = this._width - 2 * padding[0],
-            maxHeight = this._height - 2 * padding[1];
-        const symbol = extend({},
-            textStyle.symbol || this._getDefaultTextSymbol(),
-            this.options.boxSymbol || this._getDefaultBoxSymbol(),
-            {
-                'textName' : this._content,
-                'markerWidth' : this._width,
-                'markerHeight' : this._height,
-                'textHorizontalAlignment' : 'middle',
-                'textVerticalAlignment' : 'middle',
-                'textMaxWidth' : maxWidth,
-                'textMaxHeight' : maxHeight
-            });
-
-        if (textStyle['wrap'] && !symbol['textWrapWidth']) {
-            symbol['textWrapWidth'] = maxWidth;
-        }
-
-        const hAlign = textStyle['horizontalAlignment'];
-        symbol['textDx'] = symbol['markerDx'] || 0;
-        const offsetX = symbol['markerWidth'] / 2 - padding[0];
-        if (hAlign === 'left') {
-            symbol['textHorizontalAlignment'] = 'right';
-            symbol['textDx'] = symbol['textDx'] - offsetX;
-        } else if (hAlign === 'right') {
-            symbol['textHorizontalAlignment'] = 'left';
-            symbol['textDx'] = symbol['textDx'] + offsetX;
-        }
-
-        const vAlign = textStyle['verticalAlignment'];
-        symbol['textDy'] = symbol['markerDy'] || 0;
-        const offsetY = symbol['markerHeight'] / 2 - padding[1];
-        if (vAlign === 'top') {
-            symbol['textVerticalAlignment'] = 'bottom';
-            symbol['textDy'] -= offsetY;
-        } else if (vAlign === 'bottom') {
-            symbol['textVerticalAlignment'] = 'top';
-            symbol['textDy'] += offsetY;
-        }
-        this._refreshing = true;
-        this.updateSymbol(symbol);
-        delete this._refreshing;
-    }
+    this._refreshing = true
+    this.updateSymbol(symbol)
+    delete this._refreshing
+  }
 }
 
-TextBox.mergeOptions(options);
+TextBox.mergeOptions(options)
 
-TextBox.registerJSONType('TextBox');
+TextBox.registerJSONType('TextBox')
 
-export default TextBox;
+export default TextBox

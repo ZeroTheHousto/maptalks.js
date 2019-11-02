@@ -1,5 +1,5 @@
-import MultiPath from './MultiPath';
-import Polygon from './Polygon';
+import MultiPath from './MultiPath'
+import Polygon from './Polygon'
 
 /**
  * @classdesc
@@ -43,16 +43,15 @@ import Polygon from './Polygon';
  * }).addTo(layer);
  */
 class MultiPolygon extends MultiPath {
-
-    /**
+  /**
      * @param {Number[][][][]|Coordinate[][][]|Polygon[]} data - construct data, coordinates or an array of polygons
      * @param {Object} [options=null]           - options defined in [MultiPolygon]{@link MultiPolygon#options}
      */
-    constructor(data, opts) {
-        super(Polygon, 'MultiPolygon', data, opts);
-    }
+  constructor (data, opts) {
+    super(Polygon, 'MultiPolygon', data, opts)
+  }
 }
 
-MultiPolygon.registerJSONType('MultiPolygon');
+MultiPolygon.registerJSONType('MultiPolygon')
 
-export default MultiPolygon;
+export default MultiPolygon

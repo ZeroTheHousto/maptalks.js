@@ -1,5 +1,5 @@
-import { extend } from '../../core/util';
-import TileLayer from './TileLayer';
+import { extend } from '../../core/util'
+import TileLayer from './TileLayer'
 
 /**
  * @property {Object}              options                     - TileLayer's options
@@ -16,20 +16,20 @@ import TileLayer from './TileLayer';
  * @instance
  */
 const options = {
-    crs: null,
-    uppercase: false,
-    detectRetina : false
-};
+  crs: null,
+  uppercase: false,
+  detectRetina: false
+}
 
 const defaultWmsParams = {
-    service: 'WMS',
-    request: 'GetMap',
-    layers: '',
-    styles: '',
-    format: 'image/jpeg',
-    transparent: false,
-    version: '1.1.1'
-};
+  service: 'WMS',
+  request: 'GetMap',
+  layers: '',
+  styles: '',
+  format: 'image/jpeg',
+  transparent: false,
+  version: '1.1.1'
+}
 
 /**
  * @classdesc
@@ -52,67 +52,66 @@ const defaultWmsParams = {
  * });
  */
 class WMSTileLayer extends TileLayer {
-
-    constructor(id, options) {
-        super(id);
-        const wmsParams = extend({}, defaultWmsParams);
-        for (const p in options) {
-            if (!(p in this.options)) {
-                wmsParams[p] = options[p];
-            }
-        }
-        this.setOptions(options);
-        this.setZIndex(options.zIndex);
-        const tileSize = this.getTileSize();
-        wmsParams.width = tileSize.width;
-        wmsParams.height = tileSize.height;
-        this.wmsParams = wmsParams;
-        this._wmsVersion = parseFloat(wmsParams.version);
+  constructor (id, options) {
+    super(id)
+    const wmsParams = extend({}, defaultWmsParams)
+    for (const p in options) {
+      if (!(p in this.options)) {
+        wmsParams[p] = options[p]
+      }
     }
+    this.setOptions(options)
+    this.setZIndex(options.zIndex)
+    const tileSize = this.getTileSize()
+    wmsParams.width = tileSize.width
+    wmsParams.height = tileSize.height
+    this.wmsParams = wmsParams
+    this._wmsVersion = parseFloat(wmsParams.version)
+  }
 
-    onAdd() {
-        const dpr = this.getMap().getDevicePixelRatio();
-        const r = options.detectRetina ? dpr : 1;
-        this.wmsParams.width *= r;
-        this.wmsParams.height *= r;
-        const crs = this.options.crs || this.getMap().getProjection().code;
-        const projectionKey = this._wmsVersion >= 1.3 ? 'crs' : 'srs';
-        this.wmsParams[projectionKey] = crs;
-        super.onAdd();
-    }
+  onAdd () {
+    const dpr = this.getMap().getDevicePixelRatio()
+    const r = options.detectRetina ? dpr : 1
+    this.wmsParams.width *= r
+    this.wmsParams.height *= r
+    const crs = this.options.crs || this.getMap().getProjection().code
+    const projectionKey = this._wmsVersion >= 1.3 ? 'crs' : 'srs'
+    this.wmsParams[projectionKey] = crs
+    super.onAdd()
+  }
 
-    getTileUrl(x, y, z) {
-        const res = this.getSpatialReference().getResolution(z),
-            tileConfig = this._getTileConfig(),
-            tileExtent = tileConfig.getTilePrjExtent(x, y, res);
-        const max = tileExtent.getMax(),
-            min = tileExtent.getMin();
+  getTileUrl (x, y, z) {
+    const res = this.getSpatialReference().getResolution(z)
+    const tileConfig = this._getTileConfig()
+    const tileExtent = tileConfig.getTilePrjExtent(x, y, res)
+    const max = tileExtent.getMax()
+    const min = tileExtent.getMin()
 
-        const bbox = (this._wmsVersion >= 1.3  && this.wmsParams.crs === 'EPSG:4326' ?
-            [min.y, min.x, max.y, max.x] :
-            [min.x, min.y, max.x, max.y]).join(',');
+    const bbox = (this._wmsVersion >= 1.3 && this.wmsParams.crs === 'EPSG:4326'
+      ? [min.y, min.x, max.y, max.x]
+      : [min.x, min.y, max.x, max.y]).join(',')
 
-        const url = super.getTileUrl(x, y, z);
+    const url = super.getTileUrl(x, y, z)
 
-        return url +
+    return url +
             getParamString(this.wmsParams, url, this.options.uppercase) +
-            (this.options.uppercase ? '&BBOX=' : '&bbox=') + bbox;
-    }
+            (this.options.uppercase ? '&BBOX=' : '&bbox=') + bbox
+  }
 
-    /**
+  /**
      * Export the WMSTileLayer's json. <br>
      * It can be used to reproduce the instance by [fromJSON]{@link Layer#fromJSON} method
      * @return {Object} layer's JSON
      */
-    toJSON() {
-        return {
-            'type': 'WMSTileLayer',
-            'id': this.getId(),
-            'options': this.config()
-        };
+  toJSON () {
+    return {
+      type: 'WMSTileLayer',
+      id: this.getId(),
+      options: this.config()
     }
+  }
 
-    /**
+  /**
      * Reproduce a WMSTileLayer from layer's JSON.
      * @param  {Object} layerJSON - layer's JSON
      * @return {WMSTileLayer}
@@ -120,29 +119,29 @@ class WMSTileLayer extends TileLayer {
      * @private
      * @function
      */
-    static fromJSON(layerJSON) {
-        if (!layerJSON || layerJSON['type'] !== 'WMSTileLayer') {
-            return null;
-        }
-        return new WMSTileLayer(layerJSON['id'], layerJSON['options']);
+  static fromJSON (layerJSON) {
+    if (!layerJSON || layerJSON.type !== 'WMSTileLayer') {
+      return null
     }
+    return new WMSTileLayer(layerJSON.id, layerJSON.options)
+  }
 }
 
-WMSTileLayer.registerJSONType('WMSTileLayer');
+WMSTileLayer.registerJSONType('WMSTileLayer')
 
-WMSTileLayer.mergeOptions(options);
+WMSTileLayer.mergeOptions(options)
 
-export default WMSTileLayer;
+export default WMSTileLayer
 
 // From Leaflet
 // Converts an object into a parameter URL string, e.g. `{a: "foo", b: "bar"}`
 // translates to `'?a=foo&b=bar'`. If `existingUrl` is set, the parameters will
 // be appended at the end. If `uppercase` is `true`, the parameter names will
 // be uppercased (e.g. `'?A=foo&B=bar'`)
-export function getParamString(obj, existingUrl, uppercase) {
-    const params = [];
-    for (const i in obj) {
-        params.push(encodeURIComponent(uppercase ? i.toUpperCase() : i) + '=' + encodeURIComponent(obj[i]));
-    }
-    return ((!existingUrl || existingUrl.indexOf('?') === -1) ? '?' : '&') + params.join('&');
+export function getParamString (obj, existingUrl, uppercase) {
+  const params = []
+  for (const i in obj) {
+    params.push(encodeURIComponent(uppercase ? i.toUpperCase() : i) + '=' + encodeURIComponent(obj[i]))
+  }
+  return ((!existingUrl || existingUrl.indexOf('?') === -1) ? '?' : '&') + params.join('&')
 }

@@ -1,13 +1,13 @@
-import { INTERNAL_LAYER_PREFIX } from '../core/Constants';
-import { extend, isString, isArrayHasData, pushIn } from '../core/util';
-import Coordinate from '../geo/Coordinate';
-import Map from './Map';
+import { INTERNAL_LAYER_PREFIX } from '../core/Constants'
+import { extend, isString, isArrayHasData, pushIn } from '../core/util'
+import Coordinate from '../geo/Coordinate'
+import Map from './Map'
 
 /**
  * Methods of topo computations
  */
 Map.include(/** @lends Map.prototype */ {
-    /**
+  /**
      * Caculate distance of two coordinates.
      * @param {Number[]|Coordinate} coord1 - coordinate 1
      * @param {Number[]|Coordinate} coord2 - coordinate 2
@@ -15,37 +15,37 @@ Map.include(/** @lends Map.prototype */ {
      * @example
      * var distance = map.computeLength([0, 0], [0, 20]);
      */
-    computeLength: function (coord1, coord2) {
-        if (!this.getProjection()) {
-            return null;
-        }
-        const p1 = new Coordinate(coord1),
-            p2 = new Coordinate(coord2);
-        if (p1.equals(p2)) {
-            return 0;
-        }
-        return this.getProjection().measureLength(p1, p2);
-    },
+  computeLength: function (coord1, coord2) {
+    if (!this.getProjection()) {
+      return null
+    }
+    const p1 = new Coordinate(coord1)
+    const p2 = new Coordinate(coord2)
+    if (p1.equals(p2)) {
+      return 0
+    }
+    return this.getProjection().measureLength(p1, p2)
+  },
 
-    /**
+  /**
      * Caculate a geometry's length.
      * @param {Geometry} geometry - geometry to caculate
      * @return {Number} length, unit is meter
      */
-    computeGeometryLength: function (geometry) {
-        return geometry._computeGeodesicLength(this.getProjection());
-    },
+  computeGeometryLength: function (geometry) {
+    return geometry._computeGeodesicLength(this.getProjection())
+  },
 
-    /**
+  /**
      * Caculate a geometry's area.
      * @param  {Geometry} geometry - geometry to caculate
      * @return {Number} area, unit is sq.meter
      */
-    computeGeometryArea: function (geometry) {
-        return geometry._computeGeodesicArea(this.getProjection());
-    },
+  computeGeometryArea: function (geometry) {
+    return geometry._computeGeodesicArea(this.getProjection())
+  },
 
-    /**
+  /**
      * Identify the geometries on the given coordinate.
      * @param {Object} opts - the identify options
      * @param {Coordinate} opts.coordinate - coordinate to identify
@@ -66,44 +66,44 @@ Map.include(/** @lends Map.prototype */ {
      *      console.log(geos);
      *  });
      */
-    identify: function (opts, callback) {
-        if (!opts) {
-            return this;
-        }
-        const reqLayers = opts['layers'];
-        if (!isArrayHasData(reqLayers)) {
-            return this;
-        }
-        const layers = [];
-        for (let i = 0, len = reqLayers.length; i < len; i++) {
-            if (isString(reqLayers[i])) {
-                layers.push(this.getLayer(reqLayers[i]));
-            } else {
-                layers.push(reqLayers[i]);
-            }
-        }
-        const coordinate = new Coordinate(opts['coordinate']);
-        const options = extend({}, opts);
-        const hits = [];
-        for (let i = layers.length - 1; i >= 0; i--) {
-            if (opts['count'] && hits.length >= opts['count']) {
-                break;
-            }
-            const layer = layers[i];
-            if (!layer || !layer.getMap() || (!opts['includeInvisible'] && !layer.isVisible()) || (!opts['includeInternals'] && layer.getId().indexOf(INTERNAL_LAYER_PREFIX) >= 0)) {
-                continue;
-            }
-            const layerHits = layer.identify(coordinate, options);
-            if (layerHits) {
-                if (Array.isArray(layerHits)) {
-                    pushIn(hits, layerHits);
-                } else {
-                    hits.push(layerHits);
-                }
-            }
-        }
-        callback.call(this, hits);
-        return this;
+  identify: function (opts, callback) {
+    if (!opts) {
+      return this
     }
+    const reqLayers = opts.layers
+    if (!isArrayHasData(reqLayers)) {
+      return this
+    }
+    const layers = []
+    for (let i = 0, len = reqLayers.length; i < len; i++) {
+      if (isString(reqLayers[i])) {
+        layers.push(this.getLayer(reqLayers[i]))
+      } else {
+        layers.push(reqLayers[i])
+      }
+    }
+    const coordinate = new Coordinate(opts.coordinate)
+    const options = extend({}, opts)
+    const hits = []
+    for (let i = layers.length - 1; i >= 0; i--) {
+      if (opts.count && hits.length >= opts.count) {
+        break
+      }
+      const layer = layers[i]
+      if (!layer || !layer.getMap() || (!opts.includeInvisible && !layer.isVisible()) || (!opts.includeInternals && layer.getId().indexOf(INTERNAL_LAYER_PREFIX) >= 0)) {
+        continue
+      }
+      const layerHits = layer.identify(coordinate, options)
+      if (layerHits) {
+        if (Array.isArray(layerHits)) {
+          pushIn(hits, layerHits)
+        } else {
+          hits.push(layerHits)
+        }
+      }
+    }
+    callback.call(this, hits)
+    return this
+  }
 
-});
+})

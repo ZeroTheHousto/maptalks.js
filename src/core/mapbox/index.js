@@ -6,5 +6,5 @@
  * @name MapboxUtil
  */
 
-export * from '@maptalks/feature-filter';
-export * from '@maptalks/function-type';
+export * from '@maptalks/feature-filter'
+export * from '@maptalks/function-type'

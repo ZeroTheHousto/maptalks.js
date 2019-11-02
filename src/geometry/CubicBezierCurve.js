@@ -1,5 +1,5 @@
-import Curve from './Curve';
-import Canvas from '../core/Canvas';
+import Curve from './Curve'
+import Canvas from '../core/Canvas'
 
 /**
  * Cubic Bezier Curve
@@ -22,35 +22,34 @@ import Canvas from '../core/Canvas';
  * ).addTo(layer);
  */
 class CubicBezierCurve extends Curve {
+  static fromJSON (json) {
+    const feature = json.feature
+    const curve = new CubicBezierCurve(feature.geometry.coordinates, json.options)
+    curve.setProperties(feature.properties)
+    return curve
+  }
 
-    static fromJSON(json) {
-        const feature = json['feature'];
-        const curve = new CubicBezierCurve(feature['geometry']['coordinates'], json['options']);
-        curve.setProperties(feature['properties']);
-        return curve;
+  _toJSON (options) {
+    return {
+      feature: this.toGeoJSON(options),
+      subType: 'CubicBezierCurve'
     }
+  }
 
-    _toJSON(options) {
-        return {
-            'feature': this.toGeoJSON(options),
-            'subType': 'CubicBezierCurve'
-        };
-    }
+  // paint method on canvas
+  _paintOn (ctx, points, lineOpacity) {
+    ctx.beginPath()
+    ctx.moveTo(points[0].x, points[0].y)
+    this._bezierCurve(ctx, points)
+    Canvas._stroke(ctx, lineOpacity)
+    this._paintArrow(ctx, points, lineOpacity)
+  }
 
-    // paint method on canvas
-    _paintOn(ctx, points, lineOpacity) {
-        ctx.beginPath();
-        ctx.moveTo(points[0].x, points[0].y);
-        this._bezierCurve(ctx, points);
-        Canvas._stroke(ctx, lineOpacity);
-        this._paintArrow(ctx, points, lineOpacity);
-    }
-
-    _getArrowPoints(arrows, segments, lineWidth, arrowStyle, tolerance) {
-        return this._getCurveArrowPoints(arrows, segments, lineWidth, arrowStyle, tolerance, 3);
-    }
+  _getArrowPoints (arrows, segments, lineWidth, arrowStyle, tolerance) {
+    return this._getCurveArrowPoints(arrows, segments, lineWidth, arrowStyle, tolerance, 3)
+  }
 }
 
-CubicBezierCurve.registerJSONType('CubicBezierCurve');
+CubicBezierCurve.registerJSONType('CubicBezierCurve')
 
-export default CubicBezierCurve;
+export default CubicBezierCurve

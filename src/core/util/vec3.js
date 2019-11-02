@@ -7,11 +7,11 @@
  * @param {Number} z Z component
  * @returns {vec3} out
  */
-export function set(out, x, y, z) {
-    out[0] = x;
-    out[1] = y;
-    out[2] = z;
-    return out;
+export function set (out, x, y, z) {
+  out[0] = x
+  out[1] = y
+  out[2] = z
+  return out
 }
 
 /**
@@ -22,11 +22,11 @@ export function set(out, x, y, z) {
  * @param {vec3} b the second operand
  * @returns {vec3} out
  */
-export function add(out, a, b) {
-    out[0] = a[0] + b[0];
-    out[1] = a[1] + b[1];
-    out[2] = a[2] + b[2];
-    return out;
+export function add (out, a, b) {
+  out[0] = a[0] + b[0]
+  out[1] = a[1] + b[1]
+  out[2] = a[2] + b[2]
+  return out
 }
 
 /**
@@ -37,11 +37,11 @@ export function add(out, a, b) {
  * @param {vec3} b the second operand
  * @returns {vec3} out
  */
-export function subtract(out, a, b) {
-    out[0] = a[0] - b[0];
-    out[1] = a[1] - b[1];
-    out[2] = a[2] - b[2];
-    return out;
+export function subtract (out, a, b) {
+  out[0] = a[0] - b[0]
+  out[1] = a[1] - b[1]
+  out[2] = a[2] - b[2]
+  return out
 }
 
 /**
@@ -50,11 +50,11 @@ export function subtract(out, a, b) {
  * @param {vec3} a vector to calculate length of
  * @returns {Number} length of a
  */
-export function length(a) {
-    const x = a[0],
-        y = a[1],
-        z = a[2];
-    return Math.sqrt(x * x + y * y + z * z);
+export function length (a) {
+  const x = a[0]
+  const y = a[1]
+  const z = a[2]
+  return Math.sqrt(x * x + y * y + z * z)
 }
 
 /**
@@ -64,19 +64,19 @@ export function length(a) {
  * @param {vec3} a vector to normalize
  * @returns {vec3} out
  */
-export function normalize(out, a) {
-    const x = a[0],
-        y = a[1],
-        z = a[2];
-    let len = x * x + y * y + z * z;
-    if (len > 0) {
-        //TODO: evaluate use of glm_invsqrt here?
-        len = 1 / Math.sqrt(len);
-        out[0] = a[0] * len;
-        out[1] = a[1] * len;
-        out[2] = a[2] * len;
-    }
-    return out;
+export function normalize (out, a) {
+  const x = a[0]
+  const y = a[1]
+  const z = a[2]
+  let len = x * x + y * y + z * z
+  if (len > 0) {
+    // TODO: evaluate use of glm_invsqrt here?
+    len = 1 / Math.sqrt(len)
+    out[0] = a[0] * len
+    out[1] = a[1] * len
+    out[2] = a[2] * len
+  }
+  return out
 }
 
 /**
@@ -86,8 +86,8 @@ export function normalize(out, a) {
  * @param {vec3} b the second operand
  * @returns {Number} dot product of a and b
  */
-export function dot(a, b) {
-    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+export function dot (a, b) {
+  return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
 }
 
 /**
@@ -98,11 +98,11 @@ export function dot(a, b) {
  * @param {Number} b amount to scale the vector by
  * @returns {vec3} out
  */
-export function scale(out, a, b) {
-    out[0] = a[0] * b;
-    out[1] = a[1] * b;
-    out[2] = a[2] * b;
-    return out;
+export function scale (out, a, b) {
+  out[0] = a[0] * b
+  out[1] = a[1] * b
+  out[2] = a[2] * b
+  return out
 }
 
 /**
@@ -113,19 +113,19 @@ export function scale(out, a, b) {
  * @param {vec3} b the second operand
  * @returns {vec3} out
  */
-export function cross(out, a, b) {
-    const ax = a[0], ay = a[1], az = a[2],
-        bx = b[0], by = b[1], bz = b[2];
+export function cross (out, a, b) {
+  const ax = a[0]; const ay = a[1]; const az = a[2]
+  const bx = b[0]; const by = b[1]; const bz = b[2]
 
-    out[0] = ay * bz - az * by;
-    out[1] = az * bx - ax * bz;
-    out[2] = ax * by - ay * bx;
-    return out;
+  out[0] = ay * bz - az * by
+  out[1] = az * bx - ax * bz
+  out[2] = ax * by - ay * bx
+  return out
 }
 
-export function dist(a, b) {
-    const x = b[0] - a[0];
-    const y = b[1] - a[1];
-    const z = b[2] - a[2];
-    return Math.sqrt(x * x + y * y + z * z);
+export function dist (a, b) {
+  const x = b[0] - a[0]
+  const y = b[1] - a[1]
+  const z = b[2] - a[2]
+  return Math.sqrt(x * x + y * y + z * z)
 }

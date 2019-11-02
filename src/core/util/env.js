@@ -6,4 +6,4 @@
  * @global
  * @name IS_NODE
  */
-export const IS_NODE = Object.prototype.toString.call(typeof process !== 'undefined' ? process : 0) === '[object process]' && !process.versions['electron'] && !process.versions['nw'] && !process.versions['node-webkit'];
+export const IS_NODE = Object.prototype.toString.call(typeof process !== 'undefined' ? process : 0) === '[object process]' && !process.versions.electron && !process.versions.nw && !process.versions['node-webkit']

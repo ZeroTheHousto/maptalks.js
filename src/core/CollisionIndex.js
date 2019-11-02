@@ -1,8 +1,8 @@
-import rbush from 'rbush';
+import rbush from 'rbush'
 
-//global temparary variables
+// global temparary variables
 const search = {
-};
+}
 /**
  * 碰撞检测的实现思路：
  * 1. 选择 collsionIndex
@@ -13,50 +13,50 @@ const search = {
  *   2.2 如果没有，如果需要的，insert到collisionIndex中
  */
 class CollisionIndex {
-    constructor() {
-        this._tree = rbush(9, ['[0]', '[1]', '[2]', '[3]']);
-    }
+  constructor () {
+    this._tree = rbush(9, ['[0]', '[1]', '[2]', '[3]'])
+  }
 
-    /**
+  /**
      * Test if given box is collided with any other
      * @param {Number[]} box - [minx, miny, maxx, maxy]
      * @returns {Boolean}
      */
-    collides(box) {
-        [search.minX, search.minY, search.maxX, search.maxY] = box;
-        return this._tree.collides(search);
-    }
+  collides (box) {
+    [search.minX, search.minY, search.maxX, search.maxY] = box
+    return this._tree.collides(search)
+  }
 
-    /**
+  /**
      * Insert box in collision index
      * @param {Number[]} box - [minx, miny, maxx, maxy]
      * @returns {CollisionIndex} this
      */
-    insertBox(box) {
-        const tree = this._tree;
-        tree.insert(box);
-        return this;
-    }
+  insertBox (box) {
+    const tree = this._tree
+    tree.insert(box)
+    return this
+  }
 
-    /**
+  /**
      * Bulk insert boxes in collision index
      * Powered by rbush, it will perform better in subsquent query
      * @param {Number[][]} boxes - [[minx, miny, maxx, maxy], ...]
      * @returns {CollisionIndex} this
      */
-    bulkInsertBox(boxes) {
-        this._tree.load(boxes);
-        return this;
-    }
+  bulkInsertBox (boxes) {
+    this._tree.load(boxes)
+    return this
+  }
 
-    /**
+  /**
      * Clear the collision index
      * @returns {CollisionIndex} this
      */
-    clear() {
-        this._tree.clear();
-        return this;
-    }
+  clear () {
+    this._tree.clear()
+    return this
+  }
 }
 
-export default CollisionIndex;
+export default CollisionIndex

@@ -1,8 +1,8 @@
-import { Animation } from '../core/Animation';
-import Coordinate from '../geo/Coordinate';
-import Point from '../geo/Point';
-import Map from './Map';
-import { isNil, isFunction, hasOwn } from '../core/util';
+import { Animation } from '../core/Animation'
+import Coordinate from '../geo/Coordinate'
+import Point from '../geo/Point'
+import Map from './Map'
+import { isNil, isFunction, hasOwn } from '../core/util'
 
 // function equalView(view1, view2) {
 //     for (const p in view1) {
@@ -21,7 +21,7 @@ import { isNil, isFunction, hasOwn } from '../core/util';
 
 Map.include(/** @lends Map.prototype */{
 
-    /**
+  /**
      * Update map's view with animation.
      * @example
      * map.animateTo({
@@ -44,91 +44,91 @@ Map.include(/** @lends Map.prototype */{
      * @param  {Function} [step=null]  - step function during animation, animation frame as the parameter
      * @return {Map}         this
      */
-    animateTo(view, options = {}, step) {
-        // this._stopAnim(this._animPlayer);
-        if (isFunction(options)) {
-            step = options;
-            options = {};
+  animateTo (view, options = {}, step) {
+    // this._stopAnim(this._animPlayer);
+    if (isFunction(options)) {
+      step = options
+      options = {}
+    }
+    const projection = this.getProjection()
+    const currView = this.getView()
+    const props = {}
+    let empty = true
+    for (const p in view) {
+      if (hasOwn(view, p) && (p === 'prjCenter' || !isNil(currView[p]))) {
+        empty = false
+        if (p === 'center') {
+          const from = new Coordinate(currView[p]).toFixed(7)
+          const to = new Coordinate(view[p]).toFixed(7)
+          if (!from.equals(to)) {
+            props.center = [from, to]
+          }
+        } else if (p === 'prjCenter') {
+          const from = new Coordinate(this._getPrjCenter())
+          const to = new Coordinate(view[p])
+          if (!from.equals(to)) {
+            props.prjCenter = [from, to]
+          }
+        } else if (currView[p] !== view[p] && p !== 'around') {
+          props[p] = [currView[p], view[p]]
         }
-        const projection = this.getProjection(),
-            currView = this.getView(),
-            props = {};
-        let empty = true;
-        for (const p in view) {
-            if (hasOwn(view, p) && (p === 'prjCenter' || !isNil(currView[p]))) {
-                empty = false;
-                if (p === 'center') {
-                    const from = new Coordinate(currView[p]).toFixed(7),
-                        to = new Coordinate(view[p]).toFixed(7);
-                    if (!from.equals(to)) {
-                        props['center'] = [from, to];
-                    }
-                } else if (p === 'prjCenter') {
-                    const from = new Coordinate(this._getPrjCenter());
-                    const to = new Coordinate(view[p]);
-                    if (!from.equals(to)) {
-                        props['prjCenter'] = [from, to];
-                    }
-                } else if (currView[p] !== view[p] && p !== 'around') {
-                    props[p] = [currView[p], view[p]];
-                }
-            }
-        }
-        if (empty) {
-            return null;
-        }
-        if (this._animPlayer) {
-            if (this._isInternalAnimation) {
-                this._animPlayer.pause();
-                this._prevAnimPlayer = this._animPlayer;
-            } else {
-                delete this._prevAnimPlayer;
-                this._stopAnim(this._animPlayer);
-            }
-        }
-        const zoomOrigin = view['around'] || new Point(this.width / 2, this.height / 2);
-        // let preView = this.getView();
-        const renderer = this._getRenderer(),
-            framer = function (fn) {
-                renderer.callInNextFrame(fn);
-            };
+      }
+    }
+    if (empty) {
+      return null
+    }
+    if (this._animPlayer) {
+      if (this._isInternalAnimation) {
+        this._animPlayer.pause()
+        this._prevAnimPlayer = this._animPlayer
+      } else {
+        delete this._prevAnimPlayer
+        this._stopAnim(this._animPlayer)
+      }
+    }
+    const zoomOrigin = view.around || new Point(this.width / 2, this.height / 2)
+    // let preView = this.getView();
+    const renderer = this._getRenderer()
+    const framer = function (fn) {
+      renderer.callInNextFrame(fn)
+    }
 
-        const player = this._animPlayer = Animation.animate(props, {
-            'easing': options['easing'] || 'out',
-            'duration': options['duration'] || this.options['zoomAnimationDuration'],
-            'framer' : framer
-        }, frame => {
-            if (this.isRemoved()) {
-                player.finish();
-                return;
-            }
-            if (player.playState === 'running') {
-                // const view = this.getView();
-                // if (!options['continueOnViewChanged'] && !equalView(view, preView)) {
-                //     // map's view is updated by another operation, animation should stop
-                //     this._stopAnim(player);
-                //     return;
-                // }
-                if (frame.styles['center']) {
-                    const center = frame.styles['center'];
-                    this._setPrjCenter(projection.project(center));
-                    this.onMoving(this._parseEventFromCoord(this.getCenter()));
-                } else if (frame.styles['prjCenter']) {
-                    const center = frame.styles['prjCenter'];
-                    this._setPrjCenter(center);
-                    this.onMoving(this._parseEventFromCoord(this.getCenter()));
-                }
-                if (!isNil(frame.styles['zoom'])) {
-                    this.onZooming(frame.styles['zoom'], zoomOrigin);
-                }
-                if (!isNil(frame.styles['pitch'])) {
-                    this.setPitch(frame.styles['pitch']);
-                }
-                if (!isNil(frame.styles['bearing'])) {
-                    this.setBearing(frame.styles['bearing']);
-                }
-                // preView = this.getView();
-                /**
+    const player = this._animPlayer = Animation.animate(props, {
+      easing: options.easing || 'out',
+      duration: options.duration || this.options.zoomAnimationDuration,
+      framer: framer
+    }, frame => {
+      if (this.isRemoved()) {
+        player.finish()
+        return
+      }
+      if (player.playState === 'running') {
+        // const view = this.getView();
+        // if (!options['continueOnViewChanged'] && !equalView(view, preView)) {
+        //     // map's view is updated by another operation, animation should stop
+        //     this._stopAnim(player);
+        //     return;
+        // }
+        if (frame.styles.center) {
+          const center = frame.styles.center
+          this._setPrjCenter(projection.project(center))
+          this.onMoving(this._parseEventFromCoord(this.getCenter()))
+        } else if (frame.styles.prjCenter) {
+          const center = frame.styles.prjCenter
+          this._setPrjCenter(center)
+          this.onMoving(this._parseEventFromCoord(this.getCenter()))
+        }
+        if (!isNil(frame.styles.zoom)) {
+          this.onZooming(frame.styles.zoom, zoomOrigin)
+        }
+        if (!isNil(frame.styles.pitch)) {
+          this.setPitch(frame.styles.pitch)
+        }
+        if (!isNil(frame.styles.bearing)) {
+          this.setBearing(frame.styles.bearing)
+        }
+        // preView = this.getView();
+        /**
                  * fired when map is animating.  (panning, zooming, rotating)
                  *
                  * @event Map#animating
@@ -136,56 +136,56 @@ Map.include(/** @lends Map.prototype */{
                  * @property {String} type - animating
                  * @property {Map} target - the map fires the event
                  */
-                this._fireEvent('animating');
-            } else if (player.playState === 'finished') {
-                if (!player._interupted) {
-                    if (props['center']) {
-                        this._setPrjCenter(projection.project(props['center'][1]));
-                    } else if (props['prjCenter']) {
-                        this._setPrjCenter(props['prjCenter'][1]);
-                    }
-                    if (!isNil(props['pitch'])) {
-                        this.setPitch(props['pitch'][1]);
-                    }
-                    if (!isNil(props['bearing'])) {
-                        this.setBearing(props['bearing'][1]);
-                    }
-                }
-                this._endAnim(player, props, zoomOrigin, options);
-                // preView = this.getView();
-            }
-            if (step) {
-                step(frame);
-            }
-        });
+        this._fireEvent('animating')
+      } else if (player.playState === 'finished') {
+        if (!player._interupted) {
+          if (props.center) {
+            this._setPrjCenter(projection.project(props.center[1]))
+          } else if (props.prjCenter) {
+            this._setPrjCenter(props.prjCenter[1])
+          }
+          if (!isNil(props.pitch)) {
+            this.setPitch(props.pitch[1])
+          }
+          if (!isNil(props.bearing)) {
+            this.setBearing(props.bearing[1])
+          }
+        }
+        this._endAnim(player, props, zoomOrigin, options)
+        // preView = this.getView();
+      }
+      if (step) {
+        step(frame)
+      }
+    })
 
-        this._startAnim(props, zoomOrigin);
+    this._startAnim(props, zoomOrigin)
 
-        return player;
-    },
+    return player
+  },
 
-    _animateTo(view, options = {}, step) {
-        this._isInternalAnimation = true;
-        this._mapAnimPlayer = this.animateTo(view, options, step);
-        delete this._isInternalAnimation;
-        return this._mapAnimPlayer;
-    },
+  _animateTo (view, options = {}, step) {
+    this._isInternalAnimation = true
+    this._mapAnimPlayer = this.animateTo(view, options, step)
+    delete this._isInternalAnimation
+    return this._mapAnimPlayer
+  },
 
-    /**
+  /**
      * Whether the map is animating with .animateTo
      * @return {Boolean}
      */
-    isAnimating() {
-        return !!(this._animPlayer);
-    },
+  isAnimating () {
+    return !!(this._animPlayer)
+  },
 
-    isRotating() {
-        return this.isDragRotating() || !!this._animRotating;
-    },
+  isRotating () {
+    return this.isDragRotating() || !!this._animRotating
+  },
 
-    _endAnim(player, props, zoomOrigin, options) {
-        delete this._animRotating;
-        /**
+  _endAnim (player, props, zoomOrigin, options) {
+    delete this._animRotating
+    /**
          * fired when map's animation is interrupted by mouse event or else.
          *
          * @event Map#animateinterrupted
@@ -193,7 +193,7 @@ Map.include(/** @lends Map.prototype */{
          * @property {String} type - animateinterrupted
          * @property {Map} target - the map fires the event
          */
-        /**
+    /**
          * fired when map's animation ended (panning, zooming, rotating).
          *
          * @event Map#animateend
@@ -201,69 +201,69 @@ Map.include(/** @lends Map.prototype */{
          * @property {String} type - animateend
          * @property {Map} target - the map fires the event
          */
-        const evtType = player._interupted ? 'animateinterrupted' : 'animateend';
-        if (player === this._animPlayer) {
-            delete this._animPlayer;
-        }
-        if (player === this._mapAnimPlayer) {
-            delete this._mapAnimPlayer;
-        }
-        if (props['center']) {
-            let endCoord;
-            if (player._interupted) {
-                endCoord = this.getCenter();
-            } else {
-                endCoord = props['center'][1];
-            }
-            this.onMoveEnd(this._parseEventFromCoord(endCoord));
-        } else if (props['prjCenter']) {
-            let endCoord;
-            if (player._interupted) {
-                endCoord = this._getPrjCenter();
-            } else {
-                endCoord = props['prjCenter'][1];
-            }
-            const event = this._parseEventFromCoord(this.getProjection().unproject(endCoord));
-            event['point2d'] = this._prjToPoint(endCoord);
-            this.onMoveEnd(event);
-        }
-        if (!isNil(props['zoom'])) {
-            if (player._interupted) {
-                this.onZoomEnd(this.getZoom(), zoomOrigin);
-            } else if (!options['wheelZoom']) {
-                this.onZoomEnd(props['zoom'][1], zoomOrigin);
-            } else {
-                this.onZooming(props['zoom'][1], zoomOrigin);
-            }
-        }
-        if (evtType) {
-            this._fireEvent(evtType);
-        }
-        if (!isNil(props['pitch']) && !this.getPitch()) {
-            //https://github.com/maptalks/maptalks.js/issues/732
-            //fix blank map when pitch changes to 0
-            this.getRenderer().setToRedraw();
-        }
-        if (this._prevAnimPlayer) {
-            this._animPlayer = this._prevAnimPlayer;
-            this._prevAnimPlayer.play();
-        }
-    },
+    const evtType = player._interupted ? 'animateinterrupted' : 'animateend'
+    if (player === this._animPlayer) {
+      delete this._animPlayer
+    }
+    if (player === this._mapAnimPlayer) {
+      delete this._mapAnimPlayer
+    }
+    if (props.center) {
+      let endCoord
+      if (player._interupted) {
+        endCoord = this.getCenter()
+      } else {
+        endCoord = props.center[1]
+      }
+      this.onMoveEnd(this._parseEventFromCoord(endCoord))
+    } else if (props.prjCenter) {
+      let endCoord
+      if (player._interupted) {
+        endCoord = this._getPrjCenter()
+      } else {
+        endCoord = props.prjCenter[1]
+      }
+      const event = this._parseEventFromCoord(this.getProjection().unproject(endCoord))
+      event.point2d = this._prjToPoint(endCoord)
+      this.onMoveEnd(event)
+    }
+    if (!isNil(props.zoom)) {
+      if (player._interupted) {
+        this.onZoomEnd(this.getZoom(), zoomOrigin)
+      } else if (!options.wheelZoom) {
+        this.onZoomEnd(props.zoom[1], zoomOrigin)
+      } else {
+        this.onZooming(props.zoom[1], zoomOrigin)
+      }
+    }
+    if (evtType) {
+      this._fireEvent(evtType)
+    }
+    if (!isNil(props.pitch) && !this.getPitch()) {
+      // https://github.com/maptalks/maptalks.js/issues/732
+      // fix blank map when pitch changes to 0
+      this.getRenderer().setToRedraw()
+    }
+    if (this._prevAnimPlayer) {
+      this._animPlayer = this._prevAnimPlayer
+      this._prevAnimPlayer.play()
+    }
+  },
 
-    _startAnim(props, zoomOrigin) {
-        if (!this._animPlayer) {
-            return;
-        }
-        if (props['center']) {
-            this.onMoveStart();
-        }
-        if (props['zoom'] && !this.isZooming()) {
-            this.onZoomStart(props['zoom'][1], zoomOrigin);
-        }
-        if (props['pitch'] || props['bearing']) {
-            this._animRotating = true;
-        }
-        /**
+  _startAnim (props, zoomOrigin) {
+    if (!this._animPlayer) {
+      return
+    }
+    if (props.center) {
+      this.onMoveStart()
+    }
+    if (props.zoom && !this.isZooming()) {
+      this.onZoomStart(props.zoom[1], zoomOrigin)
+    }
+    if (props.pitch || props.bearing) {
+      this._animRotating = true
+    }
+    /**
          * fired when map starts to animate (panning, zooming, rotating).
          *
          * @event Map#animatestart
@@ -271,27 +271,27 @@ Map.include(/** @lends Map.prototype */{
          * @property {String} type - animatestart
          * @property {Map} target - the map fires the event
          */
-        this._fireEvent('animatestart');
-        this._animPlayer.play();
-    },
+    this._fireEvent('animatestart')
+    this._animPlayer.play()
+  },
 
-    _stopAnim(player) {
-        if (!player) {
-            return;
-        }
-        if (player.playState !== 'finished') {
-            player._interupted = true;
-            player.cancel();
-        }
-        if (player === this._animPlayer && this._prevAnimPlayer) {
-            this._animPlayer = this._prevAnimPlayer;
-            this._prevAnimPlayer.play();
-        }
-        if (player === this._animPlayer) {
-            delete this._animPlayer;
-        }
-        if (player === this._mapAnimPlayer) {
-            delete this._mapAnimPlayer;
-        }
+  _stopAnim (player) {
+    if (!player) {
+      return
     }
-});
+    if (player.playState !== 'finished') {
+      player._interupted = true
+      player.cancel()
+    }
+    if (player === this._animPlayer && this._prevAnimPlayer) {
+      this._animPlayer = this._prevAnimPlayer
+      this._prevAnimPlayer.play()
+    }
+    if (player === this._animPlayer) {
+      delete this._animPlayer
+    }
+    if (player === this._mapAnimPlayer) {
+      delete this._mapAnimPlayer
+    }
+  }
+})

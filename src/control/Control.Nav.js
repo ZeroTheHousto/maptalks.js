@@ -1,29 +1,25 @@
-import Map from '../map/Map';
-import Control from './Control';
-
+import Map from '../map/Map'
+import Control from './Control'
 
 const options = {
-    'position': 'top-left'
-};
-
-
-export default class Nav extends Control {
-
-    buildOn() {
-        return null;
-    }
-
+  position: 'top-left'
 }
 
-Nav.mergeOptions(options);
+export default class Nav extends Control {
+  buildOn () {
+    return null
+  }
+}
+
+Nav.mergeOptions(options)
 
 Map.mergeOptions({
-    'navControl': false
-});
+  navControl: false
+})
 
 Map.addOnLoadHook(function () {
-    if (this.options['navControl']) {
-        this.navControl = new Nav(this.options['navControl']);
-        this.addControl(this.navControl);
-    }
-});
+  if (this.options.navControl) {
+    this.navControl = new Nav(this.options.navControl)
+    this.addControl(this.navControl)
+  }
+})

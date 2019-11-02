@@ -1,4 +1,4 @@
-let adapters = {};
+let adapters = {}
 /**
  * Register a worker adapter
  * @param {String} workerKey  - an unique key name of the worker adapter
@@ -22,8 +22,8 @@ let adapters = {};
     @global
     @static
  */
-export function registerWorkerAdapter(workerKey, adapter) {
-    adapters[workerKey] = adapter;
+export function registerWorkerAdapter (workerKey, adapter) {
+  adapters[workerKey] = adapter
 }
 
 const header = `
@@ -65,40 +65,39 @@ const header = `
         };
     }
     var workerExports;
-`;
+`
 
 const footer = `
     workerExports = null;
-`;
+`
 
-function compileWorkerSource() {
-    let source = header;
-    for (const p in adapters) {
-        const adapter = adapters[p];
-        source += `
+function compileWorkerSource () {
+  let source = header
+  for (const p in adapters) {
+    const adapter = adapters[p]
+    source += `
     workerExports = {};
     (${adapter})(workerExports, self);
-    adapters['${p}'] = workerExports`;
-        source += `
+    adapters['${p}'] = workerExports`
+    source += `
     workerExports.initialize && workerExports.initialize(self);
-        `;
-
-    }
-    source += footer;
-    return source;
+        `
+  }
+  source += footer
+  return source
 }
 
-let url;
+let url
 
-export function getWorkerSourcePath() {
-    if (typeof window === 'undefined') {
-        return null;
-    }
-    if (!url) {
-        const source = compileWorkerSource();
-        url = window.URL.createObjectURL(new Blob([source], { type: 'text/javascript' }));
-        //clear cached worker adapters
-        adapters = null;
-    }
-    return url;
+export function getWorkerSourcePath () {
+  if (typeof window === 'undefined') {
+    return null
+  }
+  if (!url) {
+    const source = compileWorkerSource()
+    url = window.URL.createObjectURL(new Blob([source], { type: 'text/javascript' }))
+    // clear cached worker adapters
+    adapters = null
+  }
+  return url
 }
