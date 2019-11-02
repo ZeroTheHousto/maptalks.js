@@ -7,7 +7,7 @@
   "parserOptions": {
     "sourceType": "module"
   },
-  "extends": "maptalks",
+  "extends": "standard",
   "globals": {
   },
   "rules": {
