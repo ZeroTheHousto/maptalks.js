@@ -23,9 +23,7 @@ module.exports = {
     plugins: [
         json(),
         resolve({
-            module : true,
-            jsnext : true,
-            main : true
+            mainFields: ['module', 'main', 'jsnext:main']
         }),
         commonjs(),
         babel({
@@ -42,7 +40,7 @@ module.exports = {
             'file': pkg.main
         },
         {
-            'sourcemap': false,
+            'sourcemap': true,
             'format': 'es',
             banner,
             'file': pkg.module

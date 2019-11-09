@@ -6,12 +6,12 @@
 export default Base =>
   class extends Base {
     /**
-         * Register a renderer class with the given name.
-         * @param  {String} name  - renderer's register key
-         * @param  {Function} clazz - renderer's class, a function (not necessarily a [Class]{@link Class}).
-         * @return {*} this
-         * @function Renderable.registerRenderer
-         */
+     * Register a renderer class with the given name.
+     * @param  {String} name  - renderer's register key
+     * @param  {Function} clazz - renderer's class, a function (not necessarily a [Class]{@link Class}).
+     * @return {*} this
+     * @function Renderable.registerRenderer
+     */
     static registerRenderer (name, clazz) {
       const proto = this.prototype
       const parentProto = Object.getPrototypeOf(proto)
